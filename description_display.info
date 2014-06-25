@@ -1,0 +1,4 @@
+name            = Description display
+description     = Extension of Form API that positions the #description before or after the rendered element.
+core            = 7.x
+package         = Development
