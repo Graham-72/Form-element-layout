@@ -1,0 +1,202 @@
+<?php
+
+/**
+ * @file
+ * Field support for element_order.module
+ */
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function element_order_fields_element_info_alter(&$elements) {
+  if (!empty($elements['container'])) {
+    $elements['container']['#process'][] = 'element_order_fields_process_container';
+  }
+}
+
+/**
+ * Add '#description_position' attribute for multi value fields.
+ *
+ * '#type' => 'container' process callback.
+ */
+function element_order_fields_process_container($element, $form_state) {
+  // Fields widgets with multiple values rendered using the default field
+  // behavior puts the description outside the actual field forms in a form
+  // element of #type = 'container'. The only generic-ish way I found to process
+  // description_display settings from fields into this wrapper is using this
+  // hack.
+  if (empty($element['#language']) or empty($element[$element['#language']])) {
+    return $element;
+  }
+  $lang = $element['#language'];
+  $field_form = $element[$lang];
+  if (empty($field_form['#field_name']) or empty($field_form['#cardinality'])
+      or empty($field_form['#description']) or $field_form['#cardinality'] == 1) {
+    return $element;
+  }
+  $instance = field_widget_instance($field_form, $form_state);
+  if (field_behaviors_widget('multiple values', $instance) != FIELD_BEHAVIOR_DEFAULT) {
+    return $element;
+  }
+  if (!empty($instance['settings']['description_display'])) {
+    $element[$lang]['#description_display'] = $instance['settings']['description_display'];
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function element_order_fields_field_widget_form_alter(&$element, &$form_state, $context) {
+  $instance = $context['instance'];
+  if (empty($instance['settings']['description_display'])) {
+    return;
+  }
+  $field = $context['field'];
+  $field_name = $field['field_name'];
+  $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;
+  $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
+  if ($default_behavior and $multiple) {
+    // Handled in element_order_fields_process_container().
+    return;
+  }
+  // This doesn't do any harm, no matter what subelement the field widget form
+  // function puts it in. And for many widgets this is enough.
+  $element['#description_display'] = $instance['settings']['description_display'];
+
+  // While other widgets moves/copies the description to some sub-element.
+  $widget_type = $instance['widget']['type'];
+  static $widget_sub = array(
+    'number' => 'value',
+    'email_textfield' => 'email',
+  );
+  if (isset($widget_sub[$widget_type])) {
+    $sub = $widget_sub[$widget_type];
+    $element[$sub]['#description_display'] = $instance['settings']['description_display'];
+  }
+  // Finally, a few special widgets needs special treatment, so the logics there
+  // are moved to separate hook_field_widget_WIDGET_TYPE_form_alter() hooks.
+  // Individual implementations below.
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'text_textarea'.
+ */
+function element_order_fields_field_widget_text_textarea_form_alter(&$element, &$form_state, $context) {
+  if (empty($element['#description_display'])) {
+    return;
+  }
+  if (!$context['instance']['settings']['text_processing']) {
+    $element['value']['#description_display'] = $element['#description_display'];
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'text_textfield'.
+ */
+function element_order_fields_field_widget_text_textfield_form_alter(&$element, &$form_state, $context) {
+  element_order_fields_field_widget_text_textarea_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'file_generic'.
+ */
+function element_order_fields_field_widget_file_generic_form_alter(&$element, &$form_state, $context) {
+  if (empty($element['#description_display'])) {
+    return;
+  }
+
+  foreach (element_children($element) as $delta => $child) {
+    $element[$delta]['#description_display'] = $element['#description_display'];
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'image_image'.
+ */
+function element_order_fields_field_widget_image_image_form_alter(&$element, &$form_state, $context) {
+  element_order_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for media_generic().
+ */
+function element_order_fields_field_widget_media_generic_form_alter(&$element, &$form_state, $context) {
+  element_order_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'date_popup'.
+ */
+function element_order_fields_field_widget_date_popup_form_alter(&$element, &$form_state, $context) {
+  if (empty($element['#description_display'])) {
+    return;
+  }
+  if ($element['#description_display'] == 'before') {
+    $element['#fieldset_description'] = $element['#description'];
+    if (empty($context['field']['settings']['todate'])) {
+      unset($element['#description']);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'date_select'.
+ */
+function element_order_fields_field_widget_date_select_form_alter(&$element, &$form_state, $context) {
+  element_order_fields_field_widget_date_popup_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'date_text'.
+ */
+function element_order_fields_field_widget_date_text_form_alter(&$element, &$form_state, $context) {
+  element_order_fields_field_widget_date_popup_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for field_ui_field_edit_form().
+ */
+function element_order_fields_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Minor justification of help text description to reflect that the position
+  // of the description arent set in stone.
+  $form['instance']['description']['#description'] = t('Instructions to present to the user for this field on the editing form.<br />Allowed HTML tags: @tags', array('@tags' => _field_filter_xss_display_allowed_tags()));
+  $form['instance']['settings']['description_display'] = array(
+    '#type' => 'radios',
+    '#title' => t("Help text position"),
+    '#description' => t("Descriptions for form elements are usually rendered after the input element. Use this to override the default behavior."),
+    // Let's eat our own dogfood, and give a user a preview of what this does.
+    // It also serves as a sanity check for whether this property works or not.
+    '#description_display' => 'before',
+    '#options' => array('before' => t("Before"), 'after' => t("After")),
+    '#default_value' => empty($form['#instance']['settings']['description_display']) ? 'after' : $form['#instance']['settings']['description_display'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[description]"]' => array('empty' => FALSE),
+      ),
+    ),
+  );
+  // A bit intrusive, but stick label and description together with the
+  // description_display setting.
+  $form['instance']['element_order'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("Label and help text"),
+    '#tree' => FALSE,
+    '#weight' => -9,
+  );
+  $form['instance']['#pre_render'][] = 'element_order_fields_widget_settings_pre_render';
+}
+
+/**
+ * Group label, description and description position items together.
+ *
+ * #pre_render callback for field widget settings form.
+ */
+function element_order_fields_widget_settings_pre_render($form) {
+  $form['element_order']['label'] = $form['label'];
+  $form['element_order']['description'] = $form['description'];
+  $form['element_order']['description_display'] = $form['instance_description_display'];
+  unset($form['label'], $form['description'], $form['instance_description_display']);
+  uasort($form['element_order'], 'element_sort');
+  return $form;
+}

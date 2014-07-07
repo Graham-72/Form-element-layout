@@ -1,6 +1,28 @@
 <?php
 
 /**
+ * Implements hook_theme_registry_alter().
+ */
+function element_order_theme_registry_alter(&$theme_registry) {
+  $us = drupal_get_path('module', 'element_order');
+
+  $overrides = array(
+    'form_element' => 'element_order_theme_form_element',
+    'field_multiple_value_form' => 'element_order_theme_field_multiple_value_form',
+    'text_format_wrapper' => 'element_order_theme_text_format_wrapper',
+    'field_collection_table_multiple_value_fields' => 'element_order_theme_field_collection_table_multiple_value_fields',
+    'matrix_table' => 'element_order_theme_matrix_table',
+  );
+
+  foreach ($overrides as $theme_hook => $override_function) {
+    if (!empty($theme_registry[$theme_hook])) {
+      $theme_registry[$theme_hook]['function'] = $override_function;
+      $theme_registry[$theme_hook]['includes'][] = $us . '/element_order.overrides.inc';
+    }
+  }
+}
+
+/**
  * Implements hook_element_info_alter().
  */
 function element_order_element_info_alter(&$type) {
@@ -28,25 +50,3 @@ function element_order_filter_process_format($element) {
   }
   return $element;
 }
-
-/**
- * Implements hook_theme_registry_alter().
- */
-function element_order_theme_registry_alter(&$theme_registry) {
-  $us = drupal_get_path('module', 'element_order');
-
-  $overrides = array(
-    'form_element' => 'element_order_theme_form_element',
-    'field_multiple_value_form' => 'element_order_theme_field_multiple_value_form',
-    'text_format_wrapper' => 'element_order_theme_text_format_wrapper',
-    'field_collection_table_multiple_value_fields' => 'element_order_theme_field_collection_table_multiple_value_fields',
-  );
-
-  foreach ($overrides as $theme_hook => $override_function) {
-    if (!empty($theme_registry[$theme_hook])) {
-      $theme_registry[$theme_hook]['function'] = $override_function;
-      $theme_registry[$theme_hook]['includes'][] = $us . '/element_order.overrides.inc';
-    }
-  }
-}
-

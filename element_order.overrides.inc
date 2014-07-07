@@ -31,7 +31,7 @@ function element_order_get_order($element) {
 }
 
 /**
- * Return the output of $trio in configured order.
+ * Return the output of $parts in configured order.
  */
 function element_order_output($element, &$parts) {
   $element_order = element_order_get_order($element);
@@ -104,12 +104,12 @@ function element_order_theme_form_element($variables) {
 function element_order_theme_text_format_wrapper($variables) {
   $element = $variables['element'];
 
-  $trio['children'] = $element['#children'];
+  $parts['children'] = $element['#children'];
   if (!empty($element['#description'])) {
-    $trio['description'] = '<div class="description">' . $element['#description'] . '</div>';
+    $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
   }
   $output = '<div class="text-format-wrapper">';
-  $output .= element_order_output($element, $trio);
+  $output .= element_order_output($element, $parts);
   $output .= "</div>\n";
 
   return $output;
@@ -119,7 +119,6 @@ function element_order_theme_text_format_wrapper($variables) {
  * Theme override for 'field_multiple_value_form'
  *
  * @see modules/field/field.form.inc:theme_field_multiple_value_form().
- *
  */
 function element_order_theme_field_multiple_value_form($variables) {
   $element = $variables['element'];
@@ -294,6 +293,61 @@ function element_order_theme_field_collection_table_multiple_value_fields($varia
     }
   }
 
+  return $output;
+}
+
+/**
+ * Theme a set of form elements into a table
+ */
+function element_order_theme_matrix_table($variables) {
+  $form = $variables['form'];
+  $rows_count = $form['#matrix_rows'];
+  $cols_count = $form['#matrix_cols'];
+  $more_cols = $form['#matrix_more_cols'];
+  $more_rows = $form['#matrix_more_rows'];
+  $column_labels = $form['#column_labels'];
+  $row_labels = $form['#row_labels'];
+  $field_name = $form['#field_name'];
+
+  $table_rows = array();
+  for ($row = 1; $row <= $rows_count; $row++) {
+    for ($col = 1; $col <= $cols_count; $col++) {
+      $table_rows[$row - 1][$col - 1] = drupal_render($form['grid'][$row .'-'. $col]);
+    }
+  }
+
+  //lables
+  if (!empty($row_labels)) {
+    array_unshift($column_labels, ''); //The first column will contain the label
+    foreach($row_labels as $id => $label) {
+      array_unshift($table_rows[$id - 1], $label);
+    }
+  }
+
+  //if there should be a "more rows" button, render a new row with just the button
+  if ($more_rows) {
+    $table_rows[$rows_count][1] = drupal_render($form['more_rows']);
+    for ($col = 2; $col <= $cols_count; $col++) {
+      $table_rows[$rows_count][$col] = '&nbsp;';
+    }
+  }
+
+  //if there should be a "more columns" button, render a new column with just the button
+  if ($more_cols) {
+    $column_labels[] = drupal_render($form['more_cols']);
+    for ($row = 1; $row <= $rows_count; $row++) {
+      $table_rows[$row - 1][$cols_count + 1] = '&nbsp;';
+    }
+  }
+
+  $parts = array(
+    'title' => theme('form_element_label', (array('element' => $form))),
+    'children' => theme('table', array('header' => $column_labels, 'rows' => $table_rows)),
+    'description' => filter_xss_admin($form['#description']),
+  );
+  $output  = '<div id="matrix-field-'. $field_name .'">';
+  $output .= element_order_output($form, $parts);
+  $output .= '</div>';
   return $output;
 }
 
