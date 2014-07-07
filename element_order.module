@@ -26,7 +26,7 @@ function element_order_theme_registry_alter(&$theme_registry) {
  * Implements hook_element_info_alter().
  */
 function element_order_element_info_alter(&$type) {
-  if (!empty($type['text_format'])) {
+  if (!empty($type['text_format']) and module_exists('filter')) {
     $type['text_format']['#process'][] = 'element_order_filter_process_format';
   }
 }
