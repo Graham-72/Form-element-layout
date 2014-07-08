@@ -1,36 +1,65 @@
 <?php
 
 /**
- * Implements hook_theme_registry_alter().
+ * Implements hook_theme().
  */
-function element_order_theme_registry_alter(&$theme_registry) {
-  $us = drupal_get_path('module', 'element_order');
-
-  $overrides = array(
-    'form_element' => 'element_order_theme_form_element',
-    'field_multiple_value_form' => 'element_order_theme_field_multiple_value_form',
-    'text_format_wrapper' => 'element_order_theme_text_format_wrapper',
-    'field_collection_table_multiple_value_fields' => 'element_order_theme_field_collection_table_multiple_value_fields',
-    'matrix_table' => 'element_order_theme_matrix_table',
+function element_order_theme($existing, $type, $theme, $path) {
+  return array(
+    'element_order_form_element' => array(
+      'render element' => 'element',
+    ),
+    'element_order_text_format_wrapper' => array(
+      'render element' => 'element',
+    ),
   );
-
-  foreach ($overrides as $theme_hook => $override_function) {
-    if (!empty($theme_registry[$theme_hook])) {
-      $theme_registry[$theme_hook]['function'] = $override_function;
-      $theme_registry[$theme_hook]['includes'][] = $us . '/element_order.overrides.inc';
-    }
-  }
 }
 
 /**
  * Implements hook_element_info_alter().
  */
-function element_order_element_info_alter(&$type) {
-  if (!empty($type['text_format']) and module_exists('filter')) {
-    $type['text_format']['#process'][] = 'element_order_filter_process_format';
+function element_order_element_info_alter(&$elements) {
+  // Replace all #theme_wrapper[] = 'form_element' with our custom form_element
+  // theme.
+  $form_element_wrappers = array(
+    // Core
+    'textfield',
+    'machine_name',
+    'password',
+    'password_confirm',
+    'textarea',
+    'radio',
+    'checkbox',
+    'select',
+    'date',
+    'file',
+    'item',
+    'managed_file',
+    // Contrib
+    'link_field',
+    'media',
+  );
+  foreach ($form_element_wrappers as $type) {
+    element_order_wrapper_replace('form_element', 'element_order_form_element', $elements[$type]);
+  }
+  // 'radios' and 'checkboxes' are special.
+  $elements['checkboxes']['#pre_render'][] = 'element_order_options_pre_render';
+  $elements['radios']['#pre_render'][] = 'element_order_options_pre_render';
+
+  // 'text_format': Replace #theme_wrapper with our own and reshuffle the title,
+  // description and element trio.
+  if (!empty($elements['text_format']) and module_exists('filter')) {
+    element_order_wrapper_replace('text_format_wrapper', 'element_order_text_format_wrapper', $elements['text_format']);
+    $elements['text_format']['#process'][] = 'element_order_filter_process_format';
   }
 }
 
+/**
+ * Replace #theme_wrapper => 'form_element' with our own.
+ */
+function element_order_options_pre_render($element) {
+  element_order_wrapper_replace('form_element', 'element_order_form_element', $element);
+  return $element;
+}
 
 /**
  * Extra processing for 'text_format' elements.
@@ -49,4 +78,152 @@ function element_order_filter_process_format($element) {
     unset($element['#description']);
   }
   return $element;
+}
+
+/**
+ * Replacement theme for 'form_element'.
+ *
+ * @see includes/form.inc:theme_form_element()
+ */
+function theme_element_order_form_element($variables) {
+  $element = &$variables['element'];
+
+  // This function is invoked as theme wrapper, but the rendered form element
+  // may not necessarily have been processed by form_builder().
+  $element += array(
+    '#title_display' => 'before',
+  );
+
+  // Add element #id for #type 'item'.
+  if (isset($element['#markup']) && !empty($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  // Add element's #type and #name as class to aid with JS/CSS selectors.
+  $attributes['class'] = array('form-item');
+  if (!empty($element['#type'])) {
+    $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
+  }
+  if (!empty($element['#name'])) {
+    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  }
+  // Add a class for disabled elements to facilitate cross-browser styling.
+  if (!empty($element['#attributes']['disabled'])) {
+    $attributes['class'][] = 'form-disabled';
+  }
+  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+
+  // If #title is not set, we don't display any label or required marker.
+  if (!isset($element['#title'])) {
+    $element['#title_display'] = 'none';
+  }
+  $prefix = isset($element['#field_prefix']) ? '<span class="field-prefix">' . $element['#field_prefix'] . '</span> ' : '';
+  $suffix = isset($element['#field_suffix']) ? ' <span class="field-suffix">' . $element['#field_suffix'] . '</span>' : '';
+
+  $element_parts = array('children' => $prefix . $element['#children'] . $suffix);
+  if ($element['#title_display'] != 'none' and $element['#title_display'] != 'attribute') {
+    $element_parts['title'] = theme('form_element_label', $variables);
+  }
+  if (!empty($element['#description'])) {
+    $element_parts['description'] = '<div class="description">' . $element['#description'] . "</div>\n";
+  }
+  element_order_output($element, $element_parts);
+  $output .= implode(' ', $element_parts);
+  $output .= "\n</div>\n";
+
+  return $output;
+}
+
+/**
+ * Replacement theme for 'text_format'.
+ *
+ * @see modules/filter/filter.module:theme_text_format_wrapper
+ */
+function theme_element_order_text_format_wrapper($variables) {
+  $element = $variables['element'];
+
+  $parts['children'] = $element['#children'];
+  if (!empty($element['#description'])) {
+    $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
+  }
+  $output = '<div class="text-format-wrapper">';
+  $output .= element_order_output($element, $parts);
+  $output .= "</div>\n";
+
+  return $output;
+}
+
+/**
+ * Replace #theme_wrapper matching $search with $replace.
+ *
+ * @param string $search
+ *   The theme name to search for
+ * @param string $replace
+ *   Replacement theme name
+ * @param Array $element
+ *   The element to search in.
+ */
+function element_order_wrapper_replace($search, $replace, &$element) {
+  $key = array_search($search, $element['#theme_wrappers']);
+  if ($key !== FALSE) {
+    unset($element['#theme_wrappers'][$key]);
+    $element['#theme_wrappers'][] = $replace;
+  }
+}
+
+/**
+ * Determine the render order of a form element.
+ *
+ * Returns what order #title, #children and #description should be rendered in,
+ * based on #title_display and #description_display.
+ *
+ * @param array $element
+ *   Form element
+ *
+ * @return array
+ *   An array with the three values 'title', 'children' and 'description' in
+ *   various orders.
+ */
+function element_order_get_order($element) {
+  if (!empty($element['#element_order'])) {
+    return $element['#element_order'];
+  }
+
+  $title_before = (empty($element['#title_display']) or $element['#title_display'] == 'before' or $element['#title_display'] == 'invisible');
+  $description_before = (empty($element['#description_display']) ? false : ($element['#description_display'] == 'before'));
+
+  if ($title_before) {
+    $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
+  }
+  else {
+    $order = $description_before ? array('description', 'children', 'title') : array('children', 'title', 'description');
+  }
+  return $order;
+}
+
+/**
+ * Return the output of $parts in configured order.
+ *
+ * @param Array $element
+ *   A form element.
+ * @param Array $parts
+ *   An associative array with the following optional keys:
+ *     - title
+ *     - description
+ *     - children
+ *
+ * @return string
+ *   The items in order according to configuration in $element.
+ */
+function element_order_output($element, &$parts) {
+  $element_order = element_order_get_order($element);
+  $parts_ordered = array();
+  $out = '';
+  foreach ($element_order as $element_item) {
+    if (!empty($parts[$element_item])) {
+      $out .= $parts[$element_item];
+      $parts_ordered[$element_item] = $parts[$element_item];
+    }
+  }
+  $parts = $parts_ordered;
+  return $out;
 }

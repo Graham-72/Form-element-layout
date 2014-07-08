@@ -3,49 +3,100 @@
 /**
  * @file
  * Field support for element_order.module
+ *
+ * Allow the administrator to configure help text position of fields in forms,
+ * in addition to theme override for default rendering of multi value fields.
  */
 
 /**
- * Implements hook_element_info_alter().
+ * Implements hook_theme().
  */
-function element_order_fields_element_info_alter(&$elements) {
-  if (!empty($elements['container'])) {
-    $elements['container']['#process'][] = 'element_order_fields_process_container';
+function element_order_fields_theme() {
+  $theme_file = array(
+    'file' => 'element_order_fields.theme.inc',
+  );
+  return array(
+    'element_order_fields_multiple_form' => array(
+      'render element' => 'element',
+    ),
+    'element_order_fields_matrix_table' => $theme_file + array(
+      'render element' => 'form',
+    ),
+    'element_order_fields_collection_table' => $theme_file + array(
+      'render element' => 'element',
+      'includes' => array(drupal_get_path('module', 'field_collection_table') . '/theme/theme.inc'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function element_order_fields_theme_registry_alter(&$theme_registry) {
+  $us = drupal_get_path('module', 'element_order_fields');
+
+  $overrides = array(
+    'field_collection_table_multiple_value_fields' => 'element_order_fields_theme_field_collection_table',
+  );
+
+  foreach ($overrides as $theme_hook => $override_function) {
+    if (!empty($theme_registry[$theme_hook])) {
+      $theme_registry[$theme_hook]['function'] = $override_function;
+      $theme_registry[$theme_hook]['includes'][] = $us . '/element_order_fields.overrides.inc';
+    }
   }
 }
 
 /**
- * Add '#description_position' attribute for multi value fields.
+ * Implements hook_field_attach_form().
  *
- * '#type' => 'container' process callback.
+ * One of two approaces in processing of fields. This is used to alter the
+ * wrapper/container of the fields.
  */
-function element_order_fields_process_container($element, $form_state) {
-  // Fields widgets with multiple values rendered using the default field
-  // behavior puts the description outside the actual field forms in a form
-  // element of #type = 'container'. The only generic-ish way I found to process
-  // description_display settings from fields into this wrapper is using this
-  // hack.
-  if (empty($element['#language']) or empty($element[$element['#language']])) {
-    return $element;
+function element_order_fields_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  $options['language'] = field_valid_language($langcode);
+  $form += (array) _field_invoke_default('process_element_order', $entity_type, $entity, $form, $form_state, $options);
+}
+
+/**
+ * Custom default field operation.
+ *
+ * Determine description position for field and replace the default field
+ * behavior form ('field_multiple_value_form') with our custom theme if
+ * necessary.
+ */
+function field_default_process_element_order($entity_type, $entity, $field, $instance, $langcode, $items, &$form, &$form_state) {
+  $field_name = $field['field_name'];
+  if (!empty($form[$field_name][$langcode])) {
+    if (!empty($instance['settings']['description_display']) and $instance['settings']['description_display'] == 'before') {
+      $form[$field_name][$langcode]['#description_display'] = 'before';
+      $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
+      $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
+      if ($multiple and $default_behavior) {
+        $form[$field_name][$langcode]['#theme'] = 'element_order_fields_multiple_form';
+      }
+      if ($instance['widget']['type'] == 'field_collection_table') {
+        $form[$field_name][$langcode]['#after_build'][] = 'element_order_fields_field_collection_table_after_build';
+      }
+    }
   }
-  $lang = $element['#language'];
-  $field_form = $element[$lang];
-  if (empty($field_form['#field_name']) or empty($field_form['#cardinality'])
-      or empty($field_form['#description']) or $field_form['#cardinality'] == 1) {
-    return $element;
-  }
-  $instance = field_widget_instance($field_form, $form_state);
-  if (field_behaviors_widget('multiple values', $instance) != FIELD_BEHAVIOR_DEFAULT) {
-    return $element;
-  }
-  if (!empty($instance['settings']['description_display'])) {
-    $element[$lang]['#description_display'] = $instance['settings']['description_display'];
-  }
+}
+
+/**
+ * Provide our own theme for field_collection_table widgets.
+ */
+function element_order_fields_field_collection_table_after_build($element) {
+  $element['#theme'] = 'element_order_fields_collection_table';
   return $element;
 }
 
+
 /**
  * Implements hook_field_widget_form_alter().
+ *
+ * The second approach for processing fields. This function has ha slew of
+ * follow-up implementations more specific to the type of widget used, but they
+ * all depend on this to set the '#description_display' attribute.
  */
 function element_order_fields_field_widget_form_alter(&$element, &$form_state, $context) {
   $instance = $context['instance'];
@@ -54,10 +105,10 @@ function element_order_fields_field_widget_form_alter(&$element, &$form_state, $
   }
   $field = $context['field'];
   $field_name = $field['field_name'];
-  $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;
+  $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
   $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
   if ($default_behavior and $multiple) {
-    // Handled in element_order_fields_process_container().
+    // Handled by hook_field_attach_form().
     return;
   }
   // This doesn't do any harm, no matter what subelement the field widget form
@@ -155,6 +206,17 @@ function element_order_fields_field_widget_date_text_form_alter(&$element, &$for
 }
 
 /**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for matrix_custom().
+ */
+function element_order_fields_field_widget_matrix_text_form_alter(&$element, &$form_state, $context) {
+  $element['#theme'] = 'element_order_fields_matrix_table';
+}
+
+function element_order_fields_field_widget_matrix_custom_form_alter(&$element, &$form_state, $context) {
+  $element['#theme'] = 'element_order_fields_matrix_table';
+}
+
+/**
  * Implements hook_form_FORM_ID_alter() for field_ui_field_edit_form().
  */
 function element_order_fields_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
@@ -199,4 +261,69 @@ function element_order_fields_widget_settings_pre_render($form) {
   unset($form['label'], $form['description'], $form['instance_description_display']);
   uasort($form['element_order'], 'element_sort');
   return $form;
+}
+
+/**
+ * Partial theme override for 'field_multiple_value_form'.
+ *
+ * This only overrides default field widget behavior with multi value fields.
+ *
+ * @see modules/field/field.form.inc:theme_field_multiple_value_form().
+ */
+function theme_element_order_fields_multiple_form($variables) {
+  $element = $variables['element'];
+  $output = '';
+
+  $table_id = drupal_html_id($element['#field_name'] . '_values');
+  $order_class = $element['#field_name'] . '-delta-order';
+  $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
+
+  $header = array(
+    array(
+      'data' => '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
+      'colspan' => 2,
+      'class' => array('field-label'),
+    ),
+    t('Order'),
+  );
+  $rows = array();
+
+  // Sort items according to '_weight' (needed when the form comes back after
+  // preview or failed validation)
+  $items = array();
+  foreach (element_children($element) as $key) {
+    if ($key === 'add_more') {
+      $add_more_button = &$element[$key];
+    }
+    else {
+      $items[] = &$element[$key];
+    }
+  }
+  usort($items, '_field_sort_items_value_helper');
+
+  // Add the items as table rows.
+  foreach ($items as $key => $item) {
+    $item['_weight']['#attributes']['class'] = array($order_class);
+    $delta_element = drupal_render($item['_weight']);
+    $cells = array(
+      array('data' => '', 'class' => array('field-multiple-drag')),
+      drupal_render($item),
+      array('data' => $delta_element, 'class' => array('delta-order')),
+    );
+    $rows[] = array(
+      'data' => $cells,
+      'class' => array('draggable'),
+    );
+  }
+  $parts['children'] = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+  if ($element['#description']) {
+    $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
+  }
+  $output = '<div class="form-item">';
+  $output .= element_order_output($element, $parts);
+  $output .= '<div class="clearfix">' . drupal_render($add_more_button) . '</div>';
+  $output .= '</div>';
+
+  drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+  return $output;
 }
