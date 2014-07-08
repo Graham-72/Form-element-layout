@@ -30,24 +30,6 @@ function element_order_fields_theme() {
 }
 
 /**
- * Implements hook_theme_registry_alter().
- */
-function element_order_fields_theme_registry_alter(&$theme_registry) {
-  $us = drupal_get_path('module', 'element_order_fields');
-
-  $overrides = array(
-    'field_collection_table_multiple_value_fields' => 'element_order_fields_theme_field_collection_table',
-  );
-
-  foreach ($overrides as $theme_hook => $override_function) {
-    if (!empty($theme_registry[$theme_hook])) {
-      $theme_registry[$theme_hook]['function'] = $override_function;
-      $theme_registry[$theme_hook]['includes'][] = $us . '/element_order_fields.overrides.inc';
-    }
-  }
-}
-
-/**
  * Implements hook_field_attach_form().
  *
  * One of two approaces in processing of fields. This is used to alter the
