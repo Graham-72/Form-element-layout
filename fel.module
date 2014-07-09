@@ -3,12 +3,12 @@
 /**
  * Implements hook_theme().
  */
-function element_order_theme($existing, $type, $theme, $path) {
+function fel_theme($existing, $type, $theme, $path) {
   return array(
-    'element_order_form_element' => array(
+    'fel_form_element' => array(
       'render element' => 'element',
     ),
-    'element_order_text_format_wrapper' => array(
+    'fel_text_format_wrapper' => array(
       'render element' => 'element',
     ),
   );
@@ -17,7 +17,7 @@ function element_order_theme($existing, $type, $theme, $path) {
 /**
  * Implements hook_element_info_alter().
  */
-function element_order_element_info_alter(&$elements) {
+function fel_element_info_alter(&$elements) {
   // Replace all #theme_wrapper[] = 'form_element' with our custom form_element
   // theme.
   $form_element_wrappers = array(
@@ -39,25 +39,25 @@ function element_order_element_info_alter(&$elements) {
     'media',
   );
   foreach ($form_element_wrappers as $type) {
-    element_order_wrapper_replace('form_element', 'element_order_form_element', $elements[$type]);
+    fel_wrapper_replace('form_element', 'fel_form_element', $elements[$type]);
   }
   // 'radios' and 'checkboxes' are special.
-  $elements['checkboxes']['#pre_render'][] = 'element_order_options_pre_render';
-  $elements['radios']['#pre_render'][] = 'element_order_options_pre_render';
+  $elements['checkboxes']['#pre_render'][] = 'fel_options_pre_render';
+  $elements['radios']['#pre_render'][] = 'fel_options_pre_render';
 
   // 'text_format': Replace #theme_wrapper with our own and reshuffle the title,
   // description and element trio.
   if (!empty($elements['text_format']) and module_exists('filter')) {
-    element_order_wrapper_replace('text_format_wrapper', 'element_order_text_format_wrapper', $elements['text_format']);
-    $elements['text_format']['#process'][] = 'element_order_filter_process_format';
+    fel_wrapper_replace('text_format_wrapper', 'fel_text_format_wrapper', $elements['text_format']);
+    $elements['text_format']['#process'][] = 'fel_filter_process_format';
   }
 }
 
 /**
  * Replace #theme_wrapper => 'form_element' with our own.
  */
-function element_order_options_pre_render($element) {
-  element_order_wrapper_replace('form_element', 'element_order_form_element', $element);
+function fel_options_pre_render($element) {
+  fel_wrapper_replace('form_element', 'fel_form_element', $element);
   return $element;
 }
 
@@ -72,7 +72,7 @@ function element_order_options_pre_render($element) {
  * This processing is necessary in order to move the description from this
  * element to the child element 'value' when '#description_display' == 'before.
  */
-function element_order_filter_process_format($element) {
+function fel_filter_process_format($element) {
   if (!empty($element['#description']) and !empty($element['#description_display']) and $element['#description_display'] == 'before') {
     $element['value']['#description'] = $element['#description'];
     unset($element['#description']);
@@ -85,7 +85,7 @@ function element_order_filter_process_format($element) {
  *
  * @see includes/form.inc:theme_form_element()
  */
-function theme_element_order_form_element($variables) {
+function theme_fel_form_element($variables) {
   $element = &$variables['element'];
 
   // This function is invoked as theme wrapper, but the rendered form element
@@ -126,7 +126,7 @@ function theme_element_order_form_element($variables) {
   if (!empty($element['#description'])) {
     $element_parts['description'] = '<div class="description">' . $element['#description'] . "</div>\n";
   }
-  element_order_output($element, $element_parts);
+  fel_order_output($element, $element_parts);
   $output .= implode(' ', $element_parts);
   $output .= "\n</div>\n";
 
@@ -138,7 +138,7 @@ function theme_element_order_form_element($variables) {
  *
  * @see modules/filter/filter.module:theme_text_format_wrapper
  */
-function theme_element_order_text_format_wrapper($variables) {
+function theme_fel_text_format_wrapper($variables) {
   $element = $variables['element'];
 
   $parts['children'] = $element['#children'];
@@ -146,7 +146,7 @@ function theme_element_order_text_format_wrapper($variables) {
     $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
   }
   $output = '<div class="text-format-wrapper">';
-  $output .= element_order_output($element, $parts);
+  $output .= fel_order_output($element, $parts);
   $output .= "</div>\n";
 
   return $output;
@@ -162,7 +162,7 @@ function theme_element_order_text_format_wrapper($variables) {
  * @param Array $element
  *   The element to search in.
  */
-function element_order_wrapper_replace($search, $replace, &$element) {
+function fel_wrapper_replace($search, $replace, &$element) {
   $key = array_search($search, $element['#theme_wrappers']);
   if ($key !== FALSE) {
     unset($element['#theme_wrappers'][$key]);
@@ -183,7 +183,7 @@ function element_order_wrapper_replace($search, $replace, &$element) {
  *   An array with the three values 'title', 'children' and 'description' in
  *   various orders.
  */
-function element_order_get_order($element) {
+function fel_get_order($element) {
   if (!empty($element['#element_order'])) {
     return $element['#element_order'];
   }
@@ -214,8 +214,8 @@ function element_order_get_order($element) {
  * @return string
  *   The items in order according to configuration in $element.
  */
-function element_order_output($element, &$parts) {
-  $element_order = element_order_get_order($element);
+function fel_order_output($element, &$parts) {
+  $element_order = fel_get_order($element);
   $parts_ordered = array();
   $out = '';
   foreach ($element_order as $element_item) {

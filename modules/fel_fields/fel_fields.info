@@ -1,0 +1,6 @@
+name            = Form element layout fields
+description     = Configure description position before or after input elements for fields.
+core            = 7.x
+package         = Form
+dependencies[]  = fel
+dependencies[]  = field

@@ -1,6 +1,0 @@
-name            = Element order fields
-description     = Configure description position for fields
-core            = 7.x
-package         = Form
-dependencies[]  = element_order
-dependencies[]  = field

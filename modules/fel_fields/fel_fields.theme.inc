@@ -10,7 +10,7 @@
  *
  * Which again is an override for field_multiple_value_form().
  */
-function theme_element_order_fields_collection_table($variables) {
+function theme_fel_fields_collection_table($variables) {
   $element = $variables['element'];
   $output = '';
 
@@ -118,7 +118,7 @@ function theme_element_order_fields_collection_table($variables) {
 /**
  * Theme replacement for 'matrix_table'.
  */
-function theme_element_order_fields_matrix_table($variables) {
+function theme_fel_fields_matrix_table($variables) {
   $form = $variables['form'];
   $rows_count = $form['#matrix_rows'];
   $cols_count = $form['#matrix_cols'];
@@ -165,7 +165,7 @@ function theme_element_order_fields_matrix_table($variables) {
     'description' => filter_xss_admin($form['#description']),
   );
   $output  = '<div id="matrix-field-'. $field_name .'">';
-  $output .= element_order_output($form, $parts);
+  $output .= fel_order_output($form, $parts);
   $output .= '</div>';
   return $output;
 }

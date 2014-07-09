@@ -1,0 +1,4 @@
+name            = Form element layout
+description     = Form API extension for configuring the layout/order of #title, #description and #children of form items.
+core            = 7.x
+package         = Form

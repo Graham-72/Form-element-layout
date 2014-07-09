@@ -1,4 +1,0 @@
-name            = Element order
-description     = Extension of the form API that allows you to reorder the title, description and the input element of form elements.
-core            = 7.x
-package         = Form
