@@ -37,6 +37,7 @@ function fel_element_info_alter(&$elements) {
     // Contrib
     'link_field',
     'media',
+    'mfw_managed_file',
   );
   foreach ($form_element_wrappers as $type) {
     fel_wrapper_replace('form_element', 'fel_form_element', $elements[$type]);

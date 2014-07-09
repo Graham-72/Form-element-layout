@@ -93,8 +93,8 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
     // Handled by hook_field_attach_form().
     return;
   }
-  // This doesn't do any harm, no matter what subelement the field widget form
-  // function puts it in. And for many widgets this is enough.
+  // For many widgets this is enough and does no harm here. It's also required
+  // for many widget specific hooks below.
   $element['#description_display'] = $instance['settings']['description_display'];
 
   // While other widgets moves/copies the description to some sub-element.
@@ -102,6 +102,10 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
   static $widget_sub = array(
     'number' => 'value',
     'email_textfield' => 'email',
+    'entityreference_autocomplete' => 'target_id',
+    'metatags_quick_checkboxes' => 'metatags_quick',
+    'metatags_quick_textarea' => 'metatags_quick',
+    'metatags_quick_textfield' => 'metatags_quick',
   );
   if (isset($widget_sub[$widget_type])) {
     $sub = $widget_sub[$widget_type];
@@ -152,9 +156,23 @@ function fel_fields_field_widget_image_image_form_alter(&$element, &$form_state,
 }
 
 /**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for media_generic().
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'media_generic'.
  */
 function fel_fields_field_widget_media_generic_form_alter(&$element, &$form_state, $context) {
+  fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'file_mfw'.
+ */
+function fel_fields_field_widget_file_mfw_form_alter(&$element, &$form_state, $context) {
+  fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for  image_miw().
+ */
+function fel_fields_field_widget_image_miw_form_alter(&$element, &$form_state, $context) {
   fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
 }
 
