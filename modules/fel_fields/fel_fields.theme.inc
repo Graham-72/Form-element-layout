@@ -2,13 +2,15 @@
 
 /**
  * @file
- * Theme functions for Element order fields
+ * Theme replacement functions for Form element layout fields.
  */
 
 /**
  * Theme replacement for field_collection_table_multiple_value_fields.
  *
- * Which again is an override for field_multiple_value_form().
+ * Which again is an override for field_multiple_value_form.
+ *
+ * @see theme_field_collection_table_multiple_value_fields()
  */
 function theme_fel_fields_collection_table($variables) {
   $element = $variables['element'];
@@ -117,6 +119,8 @@ function theme_fel_fields_collection_table($variables) {
 
 /**
  * Theme replacement for 'matrix_table'.
+ *
+ * @see theme_matrix_table()
  */
 function theme_fel_fields_matrix_table($variables) {
   $form = $variables['form'];
@@ -135,15 +139,13 @@ function theme_fel_fields_matrix_table($variables) {
     }
   }
 
-  //lables
   if (!empty($row_labels)) {
-    array_unshift($column_labels, ''); //The first column will contain the label
+    array_unshift($column_labels, '');
     foreach($row_labels as $id => $label) {
       array_unshift($table_rows[$id - 1], $label);
     }
   }
 
-  //if there should be a "more rows" button, render a new row with just the button
   if ($more_rows) {
     $table_rows[$rows_count][1] = drupal_render($form['more_rows']);
     for ($col = 2; $col <= $cols_count; $col++) {
@@ -151,7 +153,6 @@ function theme_fel_fields_matrix_table($variables) {
     }
   }
 
-  //if there should be a "more columns" button, render a new column with just the button
   if ($more_cols) {
     $column_labels[] = drupal_render($form['more_cols']);
     for ($row = 1; $row <= $rows_count; $row++) {

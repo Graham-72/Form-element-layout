@@ -1,6 +1,12 @@
 <?php
 
 /**
+ * @file
+ * Form API extension that reorders the layout of form #title, #description and
+ * #children.
+ */
+
+/**
  * Implements hook_theme().
  */
 function fel_theme($existing, $type, $theme, $path) {
@@ -21,7 +27,7 @@ function fel_element_info_alter(&$elements) {
   // Replace all #theme_wrapper[] = 'form_element' with our custom form_element
   // theme.
   $form_element_wrappers = array(
-    // Core
+    // Core.
     'textfield',
     'machine_name',
     'password',
@@ -34,7 +40,7 @@ function fel_element_info_alter(&$elements) {
     'file',
     'item',
     'managed_file',
-    // Contrib
+    // Contrib.
     'link_field',
     'media',
     'mfw_managed_file',
@@ -84,7 +90,7 @@ function fel_filter_process_format($element) {
 /**
  * Replacement theme for 'form_element'.
  *
- * @see includes/form.inc:theme_form_element()
+ * @see theme_form_element()
  */
 function theme_fel_form_element($variables) {
   $element = &$variables['element'];
@@ -137,7 +143,7 @@ function theme_fel_form_element($variables) {
 /**
  * Replacement theme for 'text_format'.
  *
- * @see modules/filter/filter.module:theme_text_format_wrapper
+ * @see theme_text_format_wrapper()
  */
 function theme_fel_text_format_wrapper($variables) {
   $element = $variables['element'];
@@ -154,20 +160,22 @@ function theme_fel_text_format_wrapper($variables) {
 }
 
 /**
- * Replace #theme_wrapper matching $search with $replace.
+ * Replace $search in $element['#theme_wrapper'] with $replace.
  *
  * @param string $search
  *   The theme name to search for
  * @param string $replace
  *   Replacement theme name
- * @param Array $element
+ * @param array $element
  *   The element to search in.
  */
 function fel_wrapper_replace($search, $replace, &$element) {
-  $key = array_search($search, $element['#theme_wrappers']);
-  if ($key !== FALSE) {
-    unset($element['#theme_wrappers'][$key]);
-    $element['#theme_wrappers'][] = $replace;
+  if (is_array($element['#theme_wrappers'])) {
+    $key = array_search($search, $element['#theme_wrappers']);
+    if ($key !== FALSE) {
+      unset($element['#theme_wrappers'][$key]);
+      $element['#theme_wrappers'][] = $replace;
+    }
   }
 }
 
@@ -190,7 +198,7 @@ function fel_get_order($element) {
   }
 
   $title_before = (empty($element['#title_display']) or $element['#title_display'] == 'before' or $element['#title_display'] == 'invisible');
-  $description_before = (empty($element['#description_display']) ? false : ($element['#description_display'] == 'before'));
+  $description_before = (empty($element['#description_display']) ? FALSE : ($element['#description_display'] == 'before'));
 
   if ($title_before) {
     $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
@@ -204,9 +212,9 @@ function fel_get_order($element) {
 /**
  * Return the output of $parts in configured order.
  *
- * @param Array $element
+ * @param array $element
  *   A form element.
- * @param Array $parts
+ * @param array $parts
  *   An associative array with the following optional keys:
  *     - title
  *     - description
