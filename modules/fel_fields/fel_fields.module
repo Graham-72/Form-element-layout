@@ -93,87 +93,19 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
     // Handled by hook_field_attach_form().
     return;
   }
-  // For many widgets this is enough and does no harm here. It's also required
-  // for many widget specific hooks below.
-  $element['#description_display'] = $instance['settings']['description_display'];
+  fel_fields_assign_layout_deep($element, $instance);
+}
 
-  // While other widgets moves/copies the description to some sub-element.
-  $widget_type = $instance['widget']['type'];
-  static $widget_sub = array(
-    'number' => 'value',
-    'email_textfield' => 'email',
-    'entityreference_autocomplete' => 'target_id',
-    'metatags_quick_checkboxes' => 'metatags_quick',
-    'metatags_quick_textarea' => 'metatags_quick',
-    'metatags_quick_textfield' => 'metatags_quick',
-  );
-  if (isset($widget_sub[$widget_type])) {
-    $sub = $widget_sub[$widget_type];
-    $element[$sub]['#description_display'] = $instance['settings']['description_display'];
+/**
+ * Assign layout for a field recursively.
+ */
+function fel_fields_assign_layout_deep(&$element, $instance) {
+  if (!empty($element['#description']) and !empty($element['#type'])) {
+    $element['#description_display'] = $instance['settings']['description_display'];
   }
-  // Finally, a few special widgets needs special treatment, so the logics there
-  // are moved to separate hook_field_widget_WIDGET_TYPE_form_alter() hooks.
-  // Individual implementations below.
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'text_textarea'.
- */
-function fel_fields_field_widget_text_textarea_form_alter(&$element, &$form_state, $context) {
-  if (empty($element['#description_display'])) {
-    return;
+  foreach (element_children($element) as $key) {
+    fel_fields_assign_layout_deep($element[$key], $instance);
   }
-  if (!$context['instance']['settings']['text_processing']) {
-    $element['value']['#description_display'] = $element['#description_display'];
-  }
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'text_textfield'.
- */
-function fel_fields_field_widget_text_textfield_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_text_textarea_form_alter($element, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'file_generic'.
- */
-function fel_fields_field_widget_file_generic_form_alter(&$element, &$form_state, $context) {
-  if (empty($element['#description_display'])) {
-    return;
-  }
-
-  foreach (element_children($element) as $delta => $child) {
-    $element[$delta]['#description_display'] = $element['#description_display'];
-  }
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'image_image'.
- */
-function fel_fields_field_widget_image_image_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'media_generic'.
- */
-function fel_fields_field_widget_media_generic_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'file_mfw'.
- */
-function fel_fields_field_widget_file_mfw_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for  image_miw().
- */
-function fel_fields_field_widget_image_miw_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_file_generic_form_alter($element, $form_state, $context);
 }
 
 /**
@@ -206,12 +138,15 @@ function fel_fields_field_widget_date_text_form_alter(&$element, &$form_state, $
 }
 
 /**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for matrix_custom().
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'matrix_text'.
  */
 function fel_fields_field_widget_matrix_text_form_alter(&$element, &$form_state, $context) {
   $element['#theme'] = 'fel_fields_matrix_table';
 }
 
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter() for 'matrix_custom'.
+ */
 function fel_fields_field_widget_matrix_custom_form_alter(&$element, &$form_state, $context) {
   $element['#theme'] = 'fel_fields_matrix_table';
 }
