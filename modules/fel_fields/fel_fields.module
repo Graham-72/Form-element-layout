@@ -105,7 +105,7 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
  * @param array $instance
  *   Field instance settings.
  */
-function fel_fields_assign_layout_deep(&$element, $instance) {
+function fel_fields_assign_layout_deep(array &$element, array $instance) {
   if (!empty($element['#description'])) {
     $element['#description_display'] = $instance['settings']['description_display'];
   }

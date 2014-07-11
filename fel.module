@@ -211,10 +211,14 @@ function fel_get_order(array $element) {
   $description_before = (empty($element['#description_display']) ? FALSE : ($element['#description_display'] == 'before'));
 
   if ($title_before) {
-    $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
+    $order = $description_before
+      ? array('title', 'description', 'children')
+      : array('title', 'children', 'description');
   }
   else {
-    $order = $description_before ? array('description', 'children', 'title') : array('children', 'title', 'description');
+    $order = $description_before
+      ? array('description', 'children', 'title')
+      : array('children', 'title', 'description');
   }
   return $order;
 }
