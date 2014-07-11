@@ -179,7 +179,7 @@ function theme_fel_text_format_wrapper($variables) {
  * @param array $element
  *   The element to search in.
  */
-function fel_wrapper_replace($search, $replace, &$element) {
+function fel_wrapper_replace($search, $replace, array &$element) {
   if (is_array($element['#theme_wrappers'])) {
     $key = array_search($search, $element['#theme_wrappers']);
     if ($key !== FALSE) {
@@ -202,7 +202,7 @@ function fel_wrapper_replace($search, $replace, &$element) {
  *   An array with the three values 'title', 'children' and 'description' in
  *   various orders.
  */
-function fel_get_order($element) {
+function fel_get_order(array $element) {
   if (!empty($element['#element_order'])) {
     return $element['#element_order'];
   }
@@ -211,14 +211,10 @@ function fel_get_order($element) {
   $description_before = (empty($element['#description_display']) ? FALSE : ($element['#description_display'] == 'before'));
 
   if ($title_before) {
-    $order = $description_before ?
-      array('title', 'description', 'children') :
-      array('title', 'children', 'description');
+    $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
   }
   else {
-    $order = $description_before ?
-      array('description', 'children', 'title') :
-      array('children', 'title', 'description');
+    $order = $description_before ? array('description', 'children', 'title') : array('children', 'title', 'description');
   }
   return $order;
 }
@@ -237,7 +233,7 @@ function fel_get_order($element) {
  * @return string
  *   The items in order according to configuration in $element.
  */
-function fel_order_output($element, &$parts) {
+function fel_order_output(array $element, array &$parts) {
   $element_order = fel_get_order($element);
   $parts_ordered = array();
   $out = '';

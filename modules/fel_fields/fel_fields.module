@@ -99,6 +99,11 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
 
 /**
  * Assign layout for a field recursively.
+ *
+ * @param array $element
+ *   The form element to process layout in.
+ * @param array $instance
+ *   Field instance settings.
  */
 function fel_fields_assign_layout_deep(&$element, $instance) {
   if (!empty($element['#description'])) {
@@ -200,9 +205,7 @@ function fel_fields_widget_settings_pre_render($form) {
 }
 
 /**
- * Partial theme override for 'field_multiple_value_form'.
- *
- * This only overrides default field widget behavior with multi value fields.
+ * Theme override for 'field_multiple_value_form'.
  *
  * @see theme_field_multiple_value_form()
  */
