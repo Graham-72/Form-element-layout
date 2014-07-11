@@ -2,8 +2,7 @@
 
 /**
  * @file
- * Form API extension that reorders the layout of form #title, #description and
- * #children.
+ * Reorder #title, #description and #children in forms.
  */
 
 /**
@@ -71,7 +70,7 @@ function fel_options_pre_render($element) {
 /**
  * Extra processing for 'text_format' elements.
  *
- * filter.module groups the title and the form element (#title, #children) into
+ * Filter module groups the title and the form element (#title, #children) into
  * the 'value' child of '#type' == 'text_format' element and renders the
  * '#description' item outside this, so there is no way to jam #description
  * between #title and #children.
@@ -111,7 +110,8 @@ function theme_fel_form_element($variables) {
     $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
   }
   if (!empty($element['#name'])) {
-    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+    $replacements = array(' ' => '-', '_' => '-', '[' => '-', ']' => '');
+    $attributes['class'][] = 'form-item-' . strtr($element['#name'], $replacements);
   }
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
@@ -163,9 +163,9 @@ function theme_fel_text_format_wrapper($variables) {
  * Replace $search in $element['#theme_wrapper'] with $replace.
  *
  * @param string $search
- *   The theme name to search for
+ *   The theme name to search for.
  * @param string $replace
- *   Replacement theme name
+ *   Replacement theme name.
  * @param array $element
  *   The element to search in.
  */
@@ -186,7 +186,7 @@ function fel_wrapper_replace($search, $replace, &$element) {
  * based on #title_display and #description_display.
  *
  * @param array $element
- *   Form element
+ *   Form element.
  *
  * @return array
  *   An array with the three values 'title', 'children' and 'description' in
@@ -201,10 +201,14 @@ function fel_get_order($element) {
   $description_before = (empty($element['#description_display']) ? FALSE : ($element['#description_display'] == 'before'));
 
   if ($title_before) {
-    $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
+    $order = $description_before ?
+      array('title', 'description', 'children') :
+      array('title', 'children', 'description');
   }
   else {
-    $order = $description_before ? array('description', 'children', 'title') : array('children', 'title', 'description');
+    $order = $description_before ?
+      array('description', 'children', 'title') :
+      array('children', 'title', 'description');
   }
   return $order;
 }
@@ -216,9 +220,9 @@ function fel_get_order($element) {
  *   A form element.
  * @param array $parts
  *   An associative array with the following optional keys:
- *     - title
- *     - description
- *     - children
+ *     - 'title'.
+ *     - 'description'.
+ *     - 'children'.
  *
  * @return string
  *   The items in order according to configuration in $element.

@@ -19,12 +19,12 @@ function theme_fel_fields_collection_table($variables) {
   if (isset($element['#cardinality']) && ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED)) {
     $table_id = drupal_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
-    $required = !empty($element['#required']) ? '<span class="form-required" title="' . t('This field is required. ') . '">*</span>' : '';
+    $required = !empty($element['#required']) ? '<span class="form-required" title="' . t('This field is required.') . '">*</span>' : '';
 
     $rows = array();
 
     // Sort items according to '_weight' (needed when the form comes back after
-    // preview or failed validation)
+    // preview or failed validation).
     $items = array();
     foreach (element_children($element) as $key) {
       if (!isset($element[$key]['#entity_type'])) {
@@ -135,13 +135,13 @@ function theme_fel_fields_matrix_table($variables) {
   $table_rows = array();
   for ($row = 1; $row <= $rows_count; $row++) {
     for ($col = 1; $col <= $cols_count; $col++) {
-      $table_rows[$row - 1][$col - 1] = drupal_render($form['grid'][$row .'-'. $col]);
+      $table_rows[$row - 1][$col - 1] = drupal_render($form['grid'][$row . '-' . $col]);
     }
   }
 
   if (!empty($row_labels)) {
     array_unshift($column_labels, '');
-    foreach($row_labels as $id => $label) {
+    foreach ($row_labels as $id => $label) {
       array_unshift($table_rows[$id - 1], $label);
     }
   }
@@ -165,7 +165,7 @@ function theme_fel_fields_matrix_table($variables) {
     'children' => theme('table', array('header' => $column_labels, 'rows' => $table_rows)),
     'description' => filter_xss_admin($form['#description']),
   );
-  $output  = '<div id="matrix-field-'. $field_name .'">';
+  $output  = '<div id="matrix-field-' . $field_name . '">';
   $output .= fel_order_output($form, $parts);
   $output .= '</div>';
   return $output;

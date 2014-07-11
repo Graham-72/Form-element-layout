@@ -88,7 +88,6 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
     return;
   }
   $field = $context['field'];
-  $field_name = $field['field_name'];
   $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
   $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
   if ($default_behavior and $multiple) {
@@ -102,7 +101,7 @@ function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
  * Assign layout for a field recursively.
  */
 function fel_fields_assign_layout_deep(&$element, $instance) {
-  if (!empty($element['#description']) and !empty($element['#type'])) {
+  if (!empty($element['#description'])) {
     $element['#description_display'] = $instance['settings']['description_display'];
   }
   foreach (element_children($element) as $key) {
@@ -189,7 +188,7 @@ function fel_fields_form_field_ui_field_edit_form_alter(&$form, &$form_state, $f
 /**
  * Group label, description and description position items together.
  *
- * #pre_render callback for field widget settings form.
+ * Form #pre_render callback for field widget settings form.
  */
 function fel_fields_widget_settings_pre_render($form) {
   $form['element_layout']['label'] = $form['label'];
@@ -227,7 +226,7 @@ function theme_fel_fields_multiple_form($variables) {
     $rows = array();
 
     // Sort items according to '_weight' (needed when the form comes back after
-    // preview or failed validation)
+    // preview or failed validation).
     $items = array();
     foreach (element_children($element) as $key) {
       if ($key === 'add_more') {
@@ -253,7 +252,15 @@ function theme_fel_fields_multiple_form($variables) {
         'class' => array('draggable'),
       );
     }
-    $parts['children'] = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+    $table_args = array(
+      'header' => $header,
+      'rows' => $rows,
+      'attributes' => array(
+        'id' => $table_id,
+        'class' => array('field-multiple-table'),
+      ),
+    );
+    $parts['children'] = theme('table', $table_args);
     if ($element['#description']) {
       $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
     }

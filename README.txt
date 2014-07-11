@@ -1,6 +1,6 @@
 
---------------------------------------------------------------------------------
 ABOUT
+--------------------------------------------------------------------------------
 
 Override the order of title, description and input elements in forms, by
 replacing the primitive themes that renders elements.
@@ -9,8 +9,8 @@ A frontend for fields is also provided, making it possible to move the
 description (Help text) of fields above the input element(s).
 
 
---------------------------------------------------------------------------------
 MODULES IN PACKAGE
+--------------------------------------------------------------------------------
 
 - Form element layout (fel.module)
 
