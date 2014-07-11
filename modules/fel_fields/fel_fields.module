@@ -41,7 +41,7 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
 }
 
 /**
- * Custom field operation on behalf of field.module.
+ * Custom default field operation.
  *
  * Determine description position for field and replace the default field
  * behavior form ('field_multiple_value_form') with our custom theme if
