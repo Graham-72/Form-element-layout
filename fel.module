@@ -55,7 +55,9 @@ function fel_element_info_alter(&$elements) {
     'mfw_managed_file',
   );
   foreach ($form_element_wrappers as $type) {
-    fel_wrapper_replace('form_element', 'fel_form_element', $elements[$type]);
+    if (!empty($elements[$type])) {
+      fel_wrapper_replace('form_element', 'fel_form_element', $elements[$type]);
+    }
   }
   // 'radios' and 'checkboxes' are special.
   $elements['checkboxes']['#pre_render'][] = 'fel_options_pre_render';
