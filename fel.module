@@ -3,6 +3,16 @@
 /**
  * @file
  * Reorder #title, #description and #children in forms.
+ *
+ * Introduces a new Form API attribute: #description_display. Its value can be
+ * either 'before' or 'after', relative to #children, or the actual input
+ * element. It behaves much like the D8 issue with the same purpose.
+ * @see https://www.drupal.org/node/314385
+ *
+ * The combination of #description_display and #title_display together makes the
+ * ordering of element attributes more complex, and in cases where both #title
+ * and #description are on the same side of #children, #title always comes
+ * first.
  */
 
 /**
