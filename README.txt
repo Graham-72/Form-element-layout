@@ -1,14 +1,14 @@
 
 TABLE OF CONTENTS
 ================================================================================
+
 * ABOUT
-* MODULES
+* MODULES IN PACKAGE
   - Form element layout (fel.module)
   - Form element layout fields (fel_fields.module)
 * HOW IT WORKS: THEME REPLACEMENTS
   - Core replacements
   - Contrib replacements
-* RELATED PROJECTS AND ISSUES
 
 
 ABOUT
@@ -26,7 +26,7 @@ of #title, #description and #children in form elements by manipulating the new
 #description_display and the existing #title_display attribute.
 
 
-MODULES
+MODULES IN PACKAGE
 ================================================================================
 
 Form element layout (fel.module)
