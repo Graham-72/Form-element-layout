@@ -62,7 +62,7 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
   $field_langcodes = field_language($entity_type, $entity, NULL, $langcode);
   foreach ($instances as $instance) {
     $field_name = $instance['field_name'];
-    $field_lang = empty($field_languages[$field_name]) ? LANGUAGE_NONE : $field_languages[$field_name];
+    $field_lang = empty($field_langcodes[$field_name]) ? LANGUAGE_NONE : $field_langcodes[$field_name];
     if (empty($form[$field_name][$field_lang])) {
       continue;
     }
