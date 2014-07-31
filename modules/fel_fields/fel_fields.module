@@ -30,131 +30,91 @@ function fel_fields_theme() {
 }
 
 /**
+ * Implements hook_ctools_plugin_type().
+ */
+function fel_fields_ctools_plugin_type() {
+  $plugins['description_display'] = array();
+  return $plugins;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * AKA our own plugin implementation of 'description_display'.
+ */
+function fel_fields_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'fel_fields') {
+    return 'plugins/' . $plugin_type;
+  }
+}
+
+/**
  * Implements hook_field_attach_form().
  *
- * One of two approaces in processing of fields. This is used to alter the
- * wrapper/container of the fields.
+ * Convert field setting for description position to Form API attribute
+ * '#description_display' and insert it in the form element tree where the
+ * configured field description resides.
  */
 function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
-  $options['language'] = field_valid_language($langcode);
-  $form += (array) _field_invoke_default('process_layout', $entity_type, $entity, $form, $form_state, $options);
-}
+  ctools_include('plugins');
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  $instances = field_info_instances($entity_type, $bundle);
+  $field_langcodes = field_language($entity_type, $entity, NULL, $langcode);
+  foreach ($instances as $instance) {
+    $field_name = $instance['field_name'];
+    $field_lang = empty($field_languages[$field_name]) ? LANGUAGE_NONE : $field_languages[$field_name];
+    if (empty($form[$field_name][$field_lang])) {
+      continue;
+    }
 
-/**
- * Custom field operation on behalf of field.module.
- *
- * Determine description position for field and replace the default field
- * behavior form ('field_multiple_value_form') with our custom theme if
- * necessary.
- */
-function field_default_process_layout($entity_type, $entity, $field, $instance, $langcode, $items, &$form, &$form_state) {
-  $field_name = $field['field_name'];
-  if (!empty($form[$field_name][$langcode])) {
-    $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
+    $field = field_info_field($field_name);
     $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
-    if ($default_behavior and $multiple) {
-      $form[$field_name][$langcode]['#theme'] = 'fel_fields_multiple_form';
-      if (!empty($instance['settings']['description_display']) and $instance['settings']['description_display'] == 'before') {
-        $form[$field_name][$langcode]['#description_display'] = 'before';
+    $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
+    $field_form = &$form[$field_name][$field_lang];
+
+    // We're unconditionally taking over the theme for rendering fields with
+    // default behavior, for all fields, all over.
+    if ($default_behavior) {
+      $field_form['#theme'] = 'fel_fields_multiple_form';
+    }
+    $description_display = empty($instance['settings']['description_display']) ? 'after' : $instance['settings']['description_display'];
+    // Don't bother for default description position.
+    if ($description_display == 'after') {
+      continue;
+    }
+
+    // Add attribute to the root item. For default behavior, also add it to
+    // $delta = 0. This covers a lot of ground.
+    if (!empty($field_form['#description'])) {
+      $field_form['#description_display'] = $description_display;
+    }
+    if ($default_behavior and !$multiple) {
+      $field_form[0]['#description_display'] = $description_display;
+    }
+    $plugin = ctools_get_plugins('fel_fields', 'description_display', $instance['widget']['module']);
+    if (!$plugin) {
+      continue;
+    }
+
+    $columns = array();
+    if (!empty($plugin['callback'])) {
+      $ret = $plugin['callback']($field, $instance, $field_form, $description_display);
+      $columns = is_array($ret) ? $ret : array();
+    }
+    elseif (!empty($plugin['columns'])) {
+      $columns = $plugin['columns'];
+    }
+    if ($default_behavior) {
+      if ($multiple) {
+        continue;
       }
+      // Adapt to field.module's default behavior.
+      $field_form = &$field_form[0];
     }
-    // @todo Add more scalable framework for adding additional functionality.
-    // ctools plugins?
-    if ($instance['widget']['type'] == 'field_collection_table') {
-      $form[$field_name][$langcode]['#after_build'][] = 'fel_fields_field_collection_table_after_build';
-    }
-  }
-}
-
-/**
- * Provide our own theme for field_collection_table widgets.
- */
-function fel_fields_field_collection_table_after_build($element) {
-  $element['#theme'] = 'fel_fields_collection_table';
-  return $element;
-}
-
-
-/**
- * Implements hook_field_widget_form_alter().
- *
- * The second approach for processing fields. This function has ha slew of
- * follow-up implementations more specific to the type of widget used, but they
- * all depend on this to set the '#description_display' attribute.
- */
-function fel_fields_field_widget_form_alter(&$element, &$form_state, $context) {
-  $instance = $context['instance'];
-  if (empty($instance['settings']['description_display'])) {
-    return;
-  }
-  $field = $context['field'];
-  $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
-  $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
-  if ($default_behavior and $multiple) {
-    // Handled by hook_field_attach_form().
-    return;
-  }
-  fel_fields_assign_layout_deep($element, $instance);
-}
-
-/**
- * Assign layout for a field recursively.
- *
- * @param array $element
- *   The form element to process layout in.
- * @param array $instance
- *   Field instance settings.
- */
-function fel_fields_assign_layout_deep(array &$element, array $instance) {
-  if (!empty($element['#description'])) {
-    $element['#description_display'] = $instance['settings']['description_display'];
-  }
-  foreach (element_children($element) as $key) {
-    fel_fields_assign_layout_deep($element[$key], $instance);
-  }
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for date_popup().
- */
-function fel_fields_field_widget_date_popup_form_alter(&$element, &$form_state, $context) {
-  if (empty($element['#description_display'])) {
-    return;
-  }
-  if ($element['#description_display'] == 'before') {
-    $element['#fieldset_description'] = $element['#description'];
-    if (empty($context['field']['settings']['todate'])) {
-      unset($element['#description']);
+    foreach ($columns as $column) {
+      $field_form[$column]['#description_display'] = $description_display;
     }
   }
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for date_select().
- */
-function fel_fields_field_widget_date_select_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_date_popup_form_alter($element, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for date_text().
- */
-function fel_fields_field_widget_date_text_form_alter(&$element, &$form_state, $context) {
-  fel_fields_field_widget_date_popup_form_alter($element, $form_state, $context);
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for matrix_text().
- */
-function fel_fields_field_widget_matrix_text_form_alter(&$element, &$form_state, $context) {
-  $element['#theme'] = 'fel_fields_matrix_table';
-}
-
-/**
- * Implements hook_field_widget_WIDGET_TYPE_form_alter() for matrix_custom().
- */
-function fel_fields_field_widget_matrix_custom_form_alter(&$element, &$form_state, $context) {
-  $element['#theme'] = 'fel_fields_matrix_table';
 }
 
 /**
@@ -281,4 +241,26 @@ function theme_fel_fields_multiple_form($variables) {
   }
 
   return $output;
+}
+
+/**
+ * Common plugin callback for all 'file' types.
+ */
+function fel_fields_file_process_description_display($field, $instance, &$form, $display) {
+  foreach (element_children($form) as $delta) {
+    $form[$delta]['#description_display'] = $display;
+  }
+}
+
+
+/**
+ * Provide our own theme for field_collection_table widgets.
+ *
+ * This is an #after_build callback for the field_collection_table plugin. Due
+ * to the nature of CTools includes, this isn't included in ajax callbacks, so
+ * it have to live here.
+ */
+function fel_fields_field_collection_table_after_build($element) {
+  $element['#theme'] = 'fel_fields_collection_table';
+  return $element;
 }
