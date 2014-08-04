@@ -73,6 +73,11 @@ contrib field modules:
 
 If your favorite module isn't supported, please issue a feature request for it!
 
+Field modules may also provide support for `fel_fields.module` by adding a
+plugin for it. This is documented in the [Advanced help][] section of this
+module.
+
+[advanced help]: https://www.drupal.org/project/advanced_help
 
 ## How it works: theme replacements
 
