@@ -36,7 +36,7 @@ below). It is intended for module developers and advanced themers who want to
 manually alter forms.
 
 This module replaces the theming of individual form elements with a modified
-version (`theme('form_element')` → `theme('fal_form_element')`). And because it
+version (`theme('form_element')` → `theme('fel_form_element')`). And because it
 takes over the entire rendering it basically controls the layout of the
 primitive form elements.
 
