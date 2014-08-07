@@ -83,37 +83,56 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       continue;
     }
 
-    // Add attribute to the root item. For default behavior, also add it to
-    // $delta = 0. This covers a lot of ground.
+    // Add attribute to the root item. For default behavior with single values,
+    // also add it to $delta = 0. This covers a lot of ground.
     if (!empty($field_form['#description'])) {
       $field_form['#description_display'] = $description_display;
     }
-    if ($default_behavior and !$multiple) {
+    if ($default_behavior and !$multiple and !empty($field_form[0]['#description'])) {
       $field_form[0]['#description_display'] = $description_display;
     }
-    $plugin = ctools_get_plugins('fel_fields', 'description_display', $instance['widget']['module']);
-    if (!$plugin) {
-      continue;
-    }
 
-    $columns = array();
-    if (!empty($plugin['callback'])) {
-      $ret = $plugin['callback']($field, $instance, $field_form, $description_display);
-      $columns = is_array($ret) ? $ret : array();
-    }
-    elseif (!empty($plugin['columns'])) {
-      $columns = $plugin['columns'];
+    $plugin = ctools_get_plugins('fel_fields', 'description_display', $instance['widget']['module']);
+    if ($plugin) {
+      $columns = array();
+      if (!empty($plugin['callback'])) {
+        $ret = $plugin['callback']($field, $instance, $field_form, $description_display);
+        $columns = is_array($ret) ? $ret : array();
+      }
+      elseif (!empty($plugin['columns'])) {
+        $columns = $plugin['columns'];
+      }
     }
     if ($default_behavior) {
       if ($multiple) {
+        // This is handled in theme_fel_fields_multiple_form().
         continue;
       }
       // Adapt to field.module's default behavior.
       $field_form = &$field_form[0];
     }
-    foreach ($columns as $column) {
-      $field_form[$column]['#description_display'] = $description_display;
+    if ($plugin) {
+      foreach ($columns as $column) {
+        $field_form[$column]['#description_display'] = $description_display;
+      }
     }
+    else {
+      // Last resort. Do a recursive search for #description and add complementary
+      // #description_display if found.
+      fel_fields_assign_layout_deep($field_form, $description_display);
+    }
+  }
+}
+
+/**
+ * Assign layout for a field recursively.
+ */
+function fel_fields_assign_layout_deep(&$element, $display) {
+  foreach (element_children($element) as $key) {
+    if (!empty($element[$key]['#description']) and !empty($element[$key]['#type'])) {
+      $element[$key]['#description_display'] = $display;
+    }
+    fel_fields_assign_layout_deep($element[$key], $display);
   }
 }
 
