@@ -60,18 +60,26 @@ the input element. This is done in the field UI's field edit form.
 It has support for all field types core provides in addition to some popular
 contrib field modules:
 
+* [Address Field                ](https://www.drupal.org/project/addressfield)
 * [Date                         ](https://www.drupal.org/project/date)
 * [Email field                  ](https://www.drupal.org/project/email)
 * [Entity reference             ](https://www.drupal.org/project/entityreference)
 * [Field Collection Table       ](https://www.drupal.org/project/field_collection_table)
 * [Geofield                     ](https://www.drupal.org/project/geofield)
+* [Link                         ](https://www.drupal.org/project/link)
 * [Matrix                       ](https://www.drupal.org/project/matrix)
 * [Media                        ](https://www.drupal.org/project/media)
 * [Meta tags quick              ](https://www.drupal.org/project/metatags_quick)
 * [Multiupload filefield widget ](https://www.drupal.org/project/multiupload_filefield_widget)
 * [Multiupload imagefield widget](https://www.drupal.org/project/multiupload_imagefield_widget)
 
-If your favorite module isn't supported, please issue a feature request for it!
+For other field widgets it will simply recursively apply the
+`#description_display` attribute in tandem with the `#description` attribute if
+found. Depending on the `#type` of the element after form processing is finished
+it will work most of the time.
+
+If it doesn't and your favorite module doesn't respond to the configuration,
+please issue a feature request for it!
 
 Field modules may also provide support for `fel_fields.module` by adding a
 plugin for it. This is documented in the [Advanced help][] section of this

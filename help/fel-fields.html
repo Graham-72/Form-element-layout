@@ -69,8 +69,21 @@ $plugin = array(
 </pre>
 
 <p>
-Or (and this is important: only one of the 'columns' or 'callback' keys will be
-honored.) you can specify a callback which returns the child elements:
+It's also possible to have an empty plugin as a place-holder just to say that
+"I've added support for this and there is nothing to do" to avoid having the
+potentially expensive fall back behavior run.
+</p>
+
+<pre>
+&lt;?php
+
+$plugin = array(
+  'columns' => array(),
+);
+</pre>
+
+<p>
+Or you can specify a callback which returns the child elements:
 </p>
 
 <pre>
@@ -119,6 +132,6 @@ in <strong>$instance['settings']['description_display']</strong>.
 
 <p>
 <strong>Note!</strong> If you choose to add additional FAPI callbacks from this
-plugin callback you have to specify a function that are always loaded. This
+plugin callback you have to specify a function that is always loaded. This
 plugin isn't always loaded during the life cycle of entity field forms.
 </p>
