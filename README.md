@@ -105,10 +105,12 @@ Original theme                | Replacement theme
 ------------------------------|--------------------------
 [form_element][]              | fel_form_element
 [text_format_wrapper][]       | fel_text_format_wrapper
+[fieldset][]                  | fel_fieldset
 [field_multiple_value_form][] | fel_fields_multiple_form
 
 [form_element]:              https://api.drupal.org/api/drupal/includes!form.inc/function/theme_form_element/7
 [text_format_wrapper]:       https://api.drupal.org/api/drupal/modules!filter!filter.module/function/theme_text_format_wrapper/7
+[fieldset]:                  https://api.drupal.org/api/drupal/includes!form.inc/function/theme_fieldset/7
 [field_multiple_value_form]: https://api.drupal.org/api/drupal/modules!field!field.form.inc/function/theme_field_multiple_value_form/7
 
 
@@ -116,6 +118,7 @@ Original theme                | Replacement theme
 
 Module                 | Original theme                               | Replacement theme
 -----------------------|----------------------------------------------|-----------------------------
+Date                   | date_combo                                   | fel_date_combo
 Field collection table | field_collection_table_multiple_value_fields | fel_fields_collection_table
 Matrix                 | matrix_table                                 | fel_fields_matrix_table
 

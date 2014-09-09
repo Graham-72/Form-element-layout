@@ -26,6 +26,9 @@ function fel_theme($existing, $type, $theme, $path) {
     'fel_text_format_wrapper' => array(
       'render element' => 'element',
     ),
+    'fel_fieldset' => array(
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -62,6 +65,9 @@ function fel_element_info_alter(&$elements) {
   // 'radios' and 'checkboxes' are special.
   $elements['checkboxes']['#pre_render'][] = 'fel_options_pre_render';
   $elements['radios']['#pre_render'][] = 'fel_options_pre_render';
+
+  // Fieldsets.
+  fel_wrapper_replace('fieldset', 'fel_fieldset', $elements['fieldset']);
 
   // 'text_format': Replace #theme_wrapper with our own and reshuffle the title,
   // description and element trio.
@@ -168,6 +174,38 @@ function theme_fel_text_format_wrapper($variables) {
   $output .= fel_order_output($element, $parts);
   $output .= "</div>\n";
 
+  return $output;
+}
+
+/**
+ * Replacement theme for 'fieldset'.
+ *
+ * @see theme_fieldset()
+ */
+function theme_fel_fieldset($variables) {
+  $element = $variables['element'];
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+
+  $output = '<fieldset' . drupal_attributes($element['#attributes']) . '>';
+  if (!empty($element['#title'])) {
+    // Always wrap fieldset legends in a SPAN for CSS positioning.
+    $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
+  }
+  $output .= '<div class="fieldset-wrapper">';
+  $parts['children'] = $element['#children'];
+  if (isset($element['#value'])) {
+    $parts['children'] .= $element['#value'];
+  }
+  if (!empty($element['#description'])) {
+    $parts['description'] = '<div class="fieldset-description">' . $element['#description'] . '</div>';
+    if (empty($element['#description_display'])) {
+      $element['#description_display'] = 'before';
+    }
+  }
+  $output .= fel_order_output($element, $parts);
+  $output .= '</div>';
+  $output .= "</fieldset>\n";
   return $output;
 }
 

@@ -6,7 +6,35 @@
  */
 
 /**
- * Theme replacement for field_collection_table_multiple_value_fields.
+ * Theme replacement for 'date_combo'.
+ *
+ * @see http://drupalcontrib.org/api/drupal/contributions!date!date.theme/function/theme_date_combo/7
+ */
+function theme_fel_date_combo($variables) {
+  $element = $variables['element'];
+
+  // Group start/end items together in fieldset.
+  $fieldset = array(
+    '#title' => field_filter_xss(t($element['#title'])) . ' ' . ($element['#delta'] > 0 ? intval($element['#delta'] + 1) : ''),
+    '#value' => '',
+    '#attributes' => array(),
+    '#children' => $element['#children'],
+  );
+  if (!empty($element['#fieldset_description'])) {
+    $fieldset['#description'] = $element['#fieldset_description'];
+    if (!empty($element['#description_display'])) {
+      $fieldset['#description_display'] = $element['#description_display'];
+    }
+  }
+  // Add marker to required date fields.
+  if ($element['#required']) {
+    $fieldset['#title'] .= " " . theme('form_required_marker');
+  }
+  return theme('fel_fieldset', array('element' => $fieldset));
+}
+
+/**
+ * Theme replacement for 'field_collection_table_multiple_value_fields'.
  *
  * Which again is an override for field_multiple_value_form.
  *

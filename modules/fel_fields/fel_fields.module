@@ -19,6 +19,9 @@ function fel_fields_theme() {
     'fel_fields_multiple_form' => array(
       'render element' => 'element',
     ),
+    'fel_date_combo' => $theme_file + array(
+      'render element' => 'element',
+    ),
     'fel_fields_matrix_table' => $theme_file + array(
       'render element' => 'form',
     ),
@@ -78,10 +81,6 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       $field_form['#theme'] = 'fel_fields_multiple_form';
     }
     $description_display = empty($instance['settings']['description_display']) ? 'after' : $instance['settings']['description_display'];
-    // Don't bother for default description position.
-    if ($description_display == 'after') {
-      continue;
-    }
 
     // Add attribute to the root item. For default behavior with single values,
     // also add it to $delta = 0. This covers a lot of ground.
@@ -137,6 +136,28 @@ function fel_fields_assign_layout_deep(&$element, $display) {
 }
 
 /**
+ * Default description_display value based on field and instance.
+ *
+ * @param $field
+ *   Field settings.
+ * @param $instance
+ *   Field instance.
+ */
+function _fel_fields_default_position($field, $instance) {
+  if (!empty($instance['settings']['description_display'])) {
+    return $instance['settings']['description_display'];
+  }
+  // Field types that renders its content in a fieldset and thereby requires a
+  // default setting of 'before'
+  $before = drupal_map_assoc(array('addressfield', 'date'));
+  if (!empty($before[$field['module']])) {
+    return 'before';
+  }
+  return 'after';
+}
+
+
+/**
  * Implements hook_form_FORM_ID_alter() for field_ui_field_edit_form().
  */
 function fel_fields_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
@@ -151,7 +172,7 @@ function fel_fields_form_field_ui_field_edit_form_alter(&$form, &$form_state, $f
     // It also serves as a sanity check for whether this property works or not.
     '#description_display' => 'before',
     '#options' => array('before' => t("Before"), 'after' => t("After")),
-    '#default_value' => empty($form['#instance']['settings']['description_display']) ? 'after' : $form['#instance']['settings']['description_display'],
+    '#default_value' => _fel_fields_default_position($form['#field'], $form['#instance']),
     '#states' => array(
       'visible' => array(
         ':input[name="instance[description]"]' => array('empty' => FALSE),
@@ -266,8 +287,12 @@ function theme_fel_fields_multiple_form($variables) {
  * Common plugin callback for all 'file' types.
  */
 function fel_fields_file_process_description_display($field, $instance, &$form, $display) {
-  foreach (element_children($form) as $delta) {
-    $form[$delta]['#description_display'] = $display;
+  if ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
+    fel_wrapper_replace('fieldset', 'fel_fieldset', $form);
+    return array();
+  }
+  else {
+    return element_children($form);
   }
 }
 
