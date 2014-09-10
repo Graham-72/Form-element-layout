@@ -17,6 +17,6 @@ function fel_field_text_description_display_columns($field, $instance, $form, $d
     return array('value');
   }
   if ($instance['widget']['type'] == 'text_textarea_with_summary') {
-    return array('summary');
+    return array();
   }
 }

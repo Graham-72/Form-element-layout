@@ -86,9 +86,11 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
     // also add it to $delta = 0. This covers a lot of ground.
     if (!empty($field_form['#description'])) {
       $field_form['#description_display'] = $description_display;
+      $field_form['#description_classes'][] = 'field-help-text';
     }
     if ($default_behavior and !$multiple and !empty($field_form[0]['#description'])) {
       $field_form[0]['#description_display'] = $description_display;
+      $field_form[0]['#description_classes'][] = 'field-help-text';
     }
 
     $plugin = ctools_get_plugins('fel_fields', 'description_display', $instance['widget']['module']);
@@ -112,7 +114,10 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
     }
     if ($plugin) {
       foreach ($columns as $column) {
-        $field_form[$column]['#description_display'] = $description_display;
+        if (!empty($field_form[$column]['#description'])) {
+          $field_form[$column]['#description_display'] = $description_display;
+          $field_form[$column]['#description_classes'][] = 'field-help-text';
+        }
       }
     }
     else {
@@ -130,6 +135,7 @@ function fel_fields_assign_layout_deep(&$element, $display) {
   foreach (element_children($element) as $key) {
     if (!empty($element[$key]['#description']) and !empty($element[$key]['#type'])) {
       $element[$key]['#description_display'] = $display;
+      $element[$key]['#description_classes'][] = 'field-help-text';
     }
     fel_fields_assign_layout_deep($element[$key], $display);
   }
@@ -265,7 +271,7 @@ function theme_fel_fields_multiple_form($variables) {
     );
     $parts['children'] = theme('table', $table_args);
     if ($element['#description']) {
-      $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
+      $parts['description'] = theme('fel_description', array('element' => $element));
     }
     $output = '<div class="form-item">';
     $output .= fel_order_output($element, $parts);

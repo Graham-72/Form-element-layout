@@ -47,6 +47,8 @@ Usage for developers/themers:
       '#title' => t("Example input"),
       '#description' => t("Example description of what this element does."),
       '#description_display' => 'before', // Default is 'after'.
+      // Additional classes to the element's #description.
+      '#description_classes' => array('important'),
     );
 
 
@@ -56,6 +58,10 @@ Fields support for Form element layout. What makes this package useful for end
 users. Configure the position of the help text
 (`$field['instance']['description']`) for fields to be either before or after
 the input element. This is done in the field UI's field edit form.
+
+It will also add a class `field-help-text` on the help text configured by the
+site builder which comes handy to differentiate it from other `#description`s
+down the field input form.
 
 It has support for all field types core provides in addition to some popular
 contrib field modules:

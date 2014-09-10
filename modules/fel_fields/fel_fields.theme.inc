@@ -25,6 +25,9 @@ function theme_fel_date_combo($variables) {
     if (!empty($element['#description_display'])) {
       $fieldset['#description_display'] = $element['#description_display'];
     }
+    if (!empty($element['#description_classes'])) {
+      $fieldset['#description_classes'] = $element['#description_classes'];
+    }
   }
   // Add marker to required date fields.
   if ($element['#required']) {

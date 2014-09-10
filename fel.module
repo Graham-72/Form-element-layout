@@ -29,6 +29,9 @@ function fel_theme($existing, $type, $theme, $path) {
     'fel_fieldset' => array(
       'render element' => 'element',
     ),
+    'fel_description' => array(
+      'variables' => array('element' => NULL),
+    ),
   );
 }
 
@@ -105,6 +108,23 @@ function fel_filter_process_format($element) {
 }
 
 /**
+ * Renders the #description of a form element.
+ */
+function theme_fel_description($variables) {
+  $element = $variables['element'];
+
+  if (empty($element['#description'])) {
+    return '';
+  }
+  $description_classes = array('description');
+  if (!empty($element['#description_classes'])) {
+    $description_classes = array_merge($description_classes, $element['#description_classes']);
+  }
+
+  return '<div class="' . implode(' ', $description_classes) . '">' . $element['#description'] . "</div>\n";
+}
+
+/**
  * Replacement theme for 'form_element'.
  *
  * @see theme_form_element()
@@ -149,7 +169,7 @@ function theme_fel_form_element($variables) {
     $element_parts['title'] = theme('form_element_label', $variables);
   }
   if (!empty($element['#description'])) {
-    $element_parts['description'] = '<div class="description">' . $element['#description'] . "</div>\n";
+    $element_parts['description'] = theme('fel_description', array('element' => $element)) . "\n";
   }
   fel_order_output($element, $element_parts);
   $output .= implode(' ', $element_parts);
@@ -168,7 +188,7 @@ function theme_fel_text_format_wrapper($variables) {
 
   $parts['children'] = $element['#children'];
   if (!empty($element['#description'])) {
-    $parts['description'] = '<div class="description">' . $element['#description'] . '</div>';
+    $parts['description'] = theme('fel_description', array('element' => $element));
   }
   $output = '<div class="text-format-wrapper">';
   $output .= fel_order_output($element, $parts);
@@ -198,7 +218,8 @@ function theme_fel_fieldset($variables) {
     $parts['children'] .= $element['#value'];
   }
   if (!empty($element['#description'])) {
-    $parts['description'] = '<div class="fieldset-description">' . $element['#description'] . '</div>';
+    $element['#description_classes'][] = 'fieldset-description';
+    $parts['description'] = theme('fel_description', array('element' => $element));
     if (empty($element['#description_display'])) {
       $element['#description_display'] = 'before';
     }
