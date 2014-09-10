@@ -297,9 +297,13 @@ function fel_fields_file_process_description_display($field, $instance, &$form, 
     fel_wrapper_replace('fieldset', 'fel_fieldset', $form);
     return array();
   }
-  else {
+  // File fields annoyingly concatenates the configured description with its
+  // own suffix and file size restriction text, causing FEL to trigger valid
+  // description even when the user haven't added one.
+  if (!empty($instance['description'])) {
     return element_children($form);
   }
+  return array();
 }
 
 
