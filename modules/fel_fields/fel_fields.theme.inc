@@ -105,9 +105,7 @@ function theme_fel_fields_collection_table($variables) {
     );
     if (!empty($element['#description']) and !empty($element['#description_display']) and $element['#description_display'] == 'before') {
       $output[] = array(
-        '#prefix' => '<div class="description">',
-        '#suffix' => '</div>',
-        '#markup' => $element['#description'],
+        '#markup' => theme('fel_description', array('element' => $element)),
       );
     }
     $output['field_collection_table'] = array(
@@ -123,9 +121,7 @@ function theme_fel_fields_collection_table($variables) {
     );
     if (!empty($element['#description']) and (empty($element['#description_display']) or $element['#description_display'] == 'after')) {
       $output[] = array(
-        '#prefix' => '<div class="description">',
-        '#suffix' => '</div>',
-        '#markup' => $element['#description'],
+        '#markup' => theme('fel_description', array('element' => $element)),
       );
     }
     if (isset($add_more_button)) {
@@ -194,8 +190,11 @@ function theme_fel_fields_matrix_table($variables) {
   $parts = array(
     'title' => theme('form_element_label', (array('element' => $form))),
     'children' => theme('table', array('header' => $column_labels, 'rows' => $table_rows)),
-    'description' => filter_xss_admin($form['#description']),
   );
+  if (!empty($form['#description'])) {
+    $form['#description'] = filter_xss_admin($form['#description']);
+    $parts['description'] = theme('fel_description', array('element' => $form));
+  }
   $output  = '<div id="matrix-field-' . $field_name . '">';
   $output .= fel_order_output($form, $parts);
   $output .= '</div>';
