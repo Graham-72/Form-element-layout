@@ -12,7 +12,7 @@ $plugin = array(
 /**
  * Plugin callback.
  */
-function fel_fields_date_process_description_display($field, $instance, &$form, $display) {
+function fel_fields_date_process_description_display($field, $instance, &$form) {
   if ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
     return;
   }

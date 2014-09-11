@@ -95,7 +95,7 @@ $plugin = array(
 /**
  * Plugin callback.
  */
-function example_description_display_columns($field, $instance, $field_form, $display) {
+function example_description_display_columns($field, $instance, $field_form) {
   if ($instance['widget']['type'] == 'widget1') {
     return array('foo');
   }
@@ -113,7 +113,7 @@ to the $field_form:
 </p>
 
 <code>
-function example_description_display_columns($field, $instance, &$field_form, $display) {
+function example_description_display_columns($field, $instance, &$field_form) {
 </code>
 
 <p>

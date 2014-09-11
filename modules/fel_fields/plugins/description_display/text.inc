@@ -12,7 +12,7 @@ $plugin = array(
 /**
  * Plugin callback.
  */
-function fel_field_text_description_display_columns($field, $instance, $form, $display) {
+function fel_field_text_description_display_columns($field, $instance, $form) {
   if (!$instance['settings']['text_processing']) {
     return array('value');
   }
