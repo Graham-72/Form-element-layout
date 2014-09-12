@@ -23,6 +23,9 @@ function fel_theme($existing, $type, $theme, $path) {
     'fel_form_element' => array(
       'render element' => 'element',
     ),
+    'fel_form_element_label' => array(
+      'render element' => 'element',
+    ),
     'fel_text_format_wrapper' => array(
       'render element' => 'element',
     ),
@@ -30,7 +33,7 @@ function fel_theme($existing, $type, $theme, $path) {
       'render element' => 'element',
     ),
     'fel_description' => array(
-      'variables' => array('element' => NULL),
+      'render element' => 'element',
     ),
   );
 }
@@ -166,16 +169,57 @@ function theme_fel_form_element($variables) {
 
   $element_parts = array('children' => $prefix . $element['#children'] . $suffix);
   if ($element['#title_display'] != 'none' and $element['#title_display'] != 'attribute') {
-    $element_parts['title'] = theme('form_element_label', $variables);
+    $element_parts['title'] = theme('fel_form_element_label', $variables);
   }
   if (!empty($element['#description'])) {
-    $element_parts['description'] = theme('fel_description', array('element' => $element)) . "\n";
+    $element_parts['description'] = theme('fel_description', $variables) . "\n";
   }
   fel_order_output($element, $element_parts);
   $output .= implode(' ', $element_parts);
   $output .= "\n</div>\n";
 
   return $output;
+}
+
+/**
+ * Replacement theme for 'form_element_label'.
+ *
+ * @see theme_form_element_label().
+ */
+function theme_fel_form_element_label($variables) {
+  $element = $variables['element'];
+  // This is also used in the installer, pre-database setup.
+  $t = get_t();
+
+  // If title and required marker are both empty, output no label.
+  if ((!isset($element['#title']) || $element['#title'] === '') && empty($element['#required'])) {
+    return '';
+  }
+
+  // If the element is required, a required marker is appended to the label.
+  $required = !empty($element['#required']) ? theme('form_required_marker', array('element' => $element)) : '';
+
+  $title = filter_xss_admin($element['#title']);
+
+  $attributes = array();
+  if ($element['#title_display'] != 'invisible' and !empty($element['#title_classes'])) {
+    $attributes['class'] = $element['#title_classes'];
+  }
+  // Style the label as class option to display inline with the element.
+  if ($element['#title_display'] == 'after') {
+    $attributes['class'][] = 'option';
+  }
+  // Show label only to screen readers to avoid disruption in visual flows.
+  elseif ($element['#title_display'] == 'invisible') {
+    $attributes['class'][] = 'element-invisible';
+  }
+
+  if (!empty($element['#id'])) {
+    $attributes['for'] = $element['#id'];
+  }
+
+  // The leading whitespace helps visually separate fields from inline labels.
+  return ' <label' . drupal_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
 }
 
 /**
@@ -188,7 +232,7 @@ function theme_fel_text_format_wrapper($variables) {
 
   $parts['children'] = $element['#children'];
   if (!empty($element['#description'])) {
-    $parts['description'] = theme('fel_description', array('element' => $element));
+    $parts['description'] = theme('fel_description', $variables);
   }
   $output = '<div class="text-format-wrapper">';
   $output .= fel_order_output($element, $parts);
@@ -209,8 +253,12 @@ function theme_fel_fieldset($variables) {
 
   $output = '<fieldset' . drupal_attributes($element['#attributes']) . '>';
   if (!empty($element['#title'])) {
+    $title_classes = array('fieldset-legend');
+    if (!empty($element['#title_classes'])) {
+      $title_classes = array_merge($title_classes, $element['#title_classes']);
+    }
     // Always wrap fieldset legends in a SPAN for CSS positioning.
-    $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
+    $output .= '<legend><span class="' . implode(' ', $title_classes) . '">' . $element['#title'] . '</span></legend>';
   }
   $output .= '<div class="fieldset-wrapper">';
   $parts['children'] = $element['#children'];
@@ -219,7 +267,7 @@ function theme_fel_fieldset($variables) {
   }
   if (!empty($element['#description'])) {
     $element['#description_classes'][] = 'fieldset-description';
-    $parts['description'] = theme('fel_description', array('element' => $element));
+    $parts['description'] = theme('fel_description', $variables);
     if (empty($element['#description_display'])) {
       $element['#description_display'] = 'before';
     }

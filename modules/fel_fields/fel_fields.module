@@ -73,7 +73,6 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
     $field = field_info_field($field_name);
     $default_behavior = field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT;
     $multiple = ($field['cardinality'] > 1 or $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED);
-    $have_description = !empty($instance['description']);
     $field_form = &$form[$field_name][$field_lang];
 
     // We're unconditionally taking over the theme for rendering fields with
@@ -82,13 +81,11 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       $field_form['#theme'] = 'fel_fields_multiple_form';
     }
 
-    if ($have_description) {
-      // Add attributes to the root item. For default behavior with single
-      // values, also add it to $delta = 0. This covers a lot of ground.
-      _fel_fields_add_attributes($field_form, $instance);
-      if ($default_behavior and !$multiple) {
-        _fel_fields_add_attributes($field_form[0], $instance);
-      }
+    // Add attributes to the root item. For default behavior with single
+    // values, also add it to $delta = 0. This covers a lot of ground.
+    _fel_fields_add_attributes($field_form, $instance);
+    if ($default_behavior and !$multiple) {
+      _fel_fields_add_attributes($field_form[0], $instance);
     }
 
     // The plugin system should run independent of whether descriptions exists
@@ -105,10 +102,6 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       }
     }
 
-    if (!$have_description) {
-      // Nothing to see, nothing to do.
-      continue;
-    }
     if ($default_behavior) {
       if ($multiple) {
         // This is handled in theme_fel_fields_multiple_form().
@@ -138,8 +131,9 @@ function _fel_fields_add_attributes(&$element, $instance) {
     if (!empty($instance['settings']['description_display'])) {
       $element['#description_display'] = $instance['settings']['description_display'];
     }
-    $element['#description_classes'][] = 'field-help-text';
+    $element['#description_classes'][] = 'fel-field-help-text';
   }
+  $element['#title_classes'][] = 'fel-field-label';
 }
 
 
@@ -237,10 +231,10 @@ function theme_fel_fields_multiple_form($variables) {
     $table_id = drupal_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
-
+    $label_classes = !empty($element['#title_classes']) ? (' class="' . implode(' ', $element['#title_classes']) . '"') : '';
     $header = array(
       array(
-        'data' => '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
+        'data' => '<label' . $label_classes . '>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
         'colspan' => 2,
         'class' => array('field-label'),
       ),
@@ -285,7 +279,7 @@ function theme_fel_fields_multiple_form($variables) {
     );
     $parts['children'] = theme('table', $table_args);
     if ($element['#description']) {
-      $parts['description'] = theme('fel_description', array('element' => $element));
+      $parts['description'] = theme('fel_description', $variables);
     }
     $output = '<div class="form-item">';
     $output .= fel_order_output($element, $parts);

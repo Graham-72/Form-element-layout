@@ -29,6 +29,9 @@ function theme_fel_date_combo($variables) {
       $fieldset['#description_classes'] = $element['#description_classes'];
     }
   }
+  if (!empty($element['#title_classes'])) {
+    $fieldset['#title_classes'] = $element['#title_classes'];
+  }
   // Add marker to required date fields.
   if ($element['#required']) {
     $fieldset['#title'] .= " " . theme('form_required_marker');
@@ -69,9 +72,10 @@ function theme_fel_fields_collection_table($variables) {
     }
     usort($items, '_field_sort_items_value_helper');
 
+    $label_classes = !empty($element['#title_classes']) ? (' class="' . implode(' ', $element['#title_classes']) . '"') : '';
     $header = array(
       array(
-        'data' => '<label>' . t('!title: !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
+        'data' => '<label' . $label_classes . '>' . t('!title: !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
         'class' => array('field-label'),
       ),
     );
@@ -105,7 +109,7 @@ function theme_fel_fields_collection_table($variables) {
     );
     if (!empty($element['#description']) and !empty($element['#description_display']) and $element['#description_display'] == 'before') {
       $output[] = array(
-        '#markup' => theme('fel_description', array('element' => $element)),
+        '#markup' => theme('fel_description', $variables),
       );
     }
     $output['field_collection_table'] = array(
@@ -121,7 +125,7 @@ function theme_fel_fields_collection_table($variables) {
     );
     if (!empty($element['#description']) and (empty($element['#description_display']) or $element['#description_display'] == 'after')) {
       $output[] = array(
-        '#markup' => theme('fel_description', array('element' => $element)),
+        '#markup' => theme('fel_description', $variables),
       );
     }
     if (isset($add_more_button)) {
@@ -188,7 +192,7 @@ function theme_fel_fields_matrix_table($variables) {
   }
 
   $parts = array(
-    'title' => theme('form_element_label', (array('element' => $form))),
+    'title' => theme('fel_form_element_label', (array('element' => $form))),
     'children' => theme('table', array('header' => $column_labels, 'rows' => $table_rows)),
   );
   if (!empty($form['#description'])) {
