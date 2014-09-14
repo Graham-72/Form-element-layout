@@ -26,13 +26,13 @@ function fel_theme($existing, $type, $theme, $path) {
     'fel_form_element_label' => array(
       'render element' => 'element',
     ),
+    'fel_form_element_description' => array(
+      'render element' => 'element',
+    ),
     'fel_text_format_wrapper' => array(
       'render element' => 'element',
     ),
     'fel_fieldset' => array(
-      'render element' => 'element',
-    ),
-    'fel_description' => array(
       'render element' => 'element',
     ),
   );
@@ -113,7 +113,7 @@ function fel_filter_process_format($element) {
 /**
  * Renders the #description of a form element.
  */
-function theme_fel_description($variables) {
+function theme_fel_form_element_description($variables) {
   $element = $variables['element'];
 
   if (empty($element['#description'])) {
@@ -172,7 +172,7 @@ function theme_fel_form_element($variables) {
     $element_parts['title'] = theme('fel_form_element_label', $variables);
   }
   if (!empty($element['#description'])) {
-    $element_parts['description'] = theme('fel_description', $variables) . "\n";
+    $element_parts['description'] = theme('fel_form_element_description', $variables) . "\n";
   }
   fel_order_output($element, $element_parts);
   $output .= implode(' ', $element_parts);
@@ -232,7 +232,7 @@ function theme_fel_text_format_wrapper($variables) {
 
   $parts['children'] = $element['#children'];
   if (!empty($element['#description'])) {
-    $parts['description'] = theme('fel_description', $variables);
+    $parts['description'] = theme('fel_form_element_description', $variables);
   }
   $output = '<div class="text-format-wrapper">';
   $output .= fel_order_output($element, $parts);
@@ -267,7 +267,7 @@ function theme_fel_fieldset($variables) {
   }
   if (!empty($element['#description'])) {
     $element['#description_classes'][] = 'fieldset-description';
-    $parts['description'] = theme('fel_description', $variables);
+    $parts['description'] = theme('fel_form_element_description', $variables);
     if (empty($element['#description_display'])) {
       $element['#description_display'] = 'before';
     }

@@ -37,7 +37,8 @@ rendering and behavior around the following form attributes:
   fieldsets and *after* for the rest.
 * `#description_classes`: Array of additional classes to add to the
   `#description` when rendered. The default '*description*' class is always
-  added. It can be further customized by overriding the theme `fel_description`.
+  added. It can be further customized by overriding the theme
+  `fel_form_element_description`.
 * `#title_classes`: Array of additional classes to add to the `#title` when
   rendered.
 

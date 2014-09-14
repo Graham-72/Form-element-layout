@@ -279,7 +279,7 @@ function theme_fel_fields_multiple_form($variables) {
     );
     $parts['children'] = theme('table', $table_args);
     if ($element['#description']) {
-      $parts['description'] = theme('fel_description', $variables);
+      $parts['description'] = theme('fel_form_element_description', $variables);
     }
     $output = '<div class="form-item">';
     $output .= fel_order_output($element, $parts);

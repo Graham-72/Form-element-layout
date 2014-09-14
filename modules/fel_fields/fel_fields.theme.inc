@@ -109,7 +109,7 @@ function theme_fel_fields_collection_table($variables) {
     );
     if (!empty($element['#description']) and !empty($element['#description_display']) and $element['#description_display'] == 'before') {
       $output[] = array(
-        '#markup' => theme('fel_description', $variables),
+        '#markup' => theme('fel_form_element_description', $variables),
       );
     }
     $output['field_collection_table'] = array(
@@ -125,7 +125,7 @@ function theme_fel_fields_collection_table($variables) {
     );
     if (!empty($element['#description']) and (empty($element['#description_display']) or $element['#description_display'] == 'after')) {
       $output[] = array(
-        '#markup' => theme('fel_description', $variables),
+        '#markup' => theme('fel_form_element_description', $variables),
       );
     }
     if (isset($add_more_button)) {
@@ -197,7 +197,7 @@ function theme_fel_fields_matrix_table($variables) {
   );
   if (!empty($form['#description'])) {
     $form['#description'] = filter_xss_admin($form['#description']);
-    $parts['description'] = theme('fel_description', array('element' => $form));
+    $parts['description'] = theme('fel_form_element_description', array('element' => $form));
   }
   $output  = '<div id="matrix-field-' . $field_name . '">';
   $output .= fel_order_output($form, $parts);
