@@ -204,3 +204,76 @@ function theme_fel_fields_matrix_table($variables) {
   $output .= '</div>';
   return $output;
 }
+
+/**
+ * Theme replacement for 'multipage_pane' from field_group.module.
+ *
+ * @see theme_multipage_pane()
+ */
+function theme_fel_fields_multipage_pane($variables) {
+
+  $element = $variables['element'];
+  $group = $variables['element']['#group_object'];
+  $parent_group = $variables['element']['#parent_group_object'];
+
+  static $multipages;
+  if (!isset($multipages[$group->parent_name])) {
+    $multipages = array($group->parent_name => 0);
+  }
+  $multipages[$parent_group->group_name]++;
+
+  // Create a page title from the label.
+  $page_header = isset($parent_group->format_settings['instance_settings']['page_header']) ? $parent_group->format_settings['instance_settings']['page_header'] : 3;
+  switch ($page_header) {
+    case 1:
+      $title = $element['#title'];
+      break;
+
+    case 2:
+      $title = t('Step %count of %total', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children)));
+      break;
+
+    case 3:
+      $title = t('Step %count of %total !label', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children), '!label' => $element['#title']));
+      break;
+
+    case 0:
+    default:
+      $title = '';
+      break;
+  }
+
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+
+  $output = '<div' . drupal_attributes($element['#attributes']) . '>';
+  if (!empty($element['#title'])) {
+    // Always wrap fieldset legends in a SPAN for CSS positioning.
+    $output .= '<h2 class="multipage-pane-title"><span>' . $title . '</span></h2>';
+  }
+  $output .= '<div class="fieldset-wrapper multipage-pane-wrapper">';
+  if (!empty($element['#description'])) {
+    $element['#description_classes'][] = 'fieldset-description';
+    $output .= theme('fel_form_element_description', array('element' => $element));
+  }
+  $output .= $element['#children'];
+  if (isset($element['#value'])) {
+    $output .= $element['#value'];
+  }
+
+  // Add a page counter if needed.
+  // counter array(0 => t('No'), 1 => t('Format 1 / 10'), 2 => t('The count number only'));
+  $page_counter_format = isset($parent_group->format_settings['instance_settings']['page_counter']) ? $parent_group->format_settings['instance_settings']['page_counter'] : 1;
+  if ($page_counter_format == 1) {
+    $output .= t('<span class="multipage-counter">%count / %total</span>', array('%count' => $multipages[$parent_group->group_name], '%total' => count($parent_group->children)));
+  }
+  elseif ($page_counter_format == 2) {
+    $output .=  t('<span class="multipage-counter">%count</span>', array('%count' => $multipages[$parent_group->group_name]));
+  }
+
+  $output .= '</div>';
+  $output .= "</div>\n";
+
+  return $output;
+
+}

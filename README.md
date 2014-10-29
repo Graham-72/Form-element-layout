@@ -67,6 +67,7 @@ are supported:
 * [Email field                  ](https://www.drupal.org/project/email)
 * [Entity reference             ](https://www.drupal.org/project/entityreference)
 * [Field Collection Table       ](https://www.drupal.org/project/field_collection_table)
+* [Field Group                  ](https://www.drupal.org/project/field_group)
 * [Geofield                     ](https://www.drupal.org/project/geofield)
 * [Link                         ](https://www.drupal.org/project/link)
 * [Matrix                       ](https://www.drupal.org/project/matrix)
@@ -83,6 +84,10 @@ issue a feature request for it!
 Field modules may also provide support for `fel_fields.module` by adding a
 plugin for it. This is documented in the [Advanced help][] section of this
 module.
+
+Support for the Field Group module is only partial in the sense that you cannot
+configure or code the position of the group's descriptions, but the description
+provided by the user will have its own classes
 
 [advanced help]: https://www.drupal.org/project/advanced_help
 
@@ -122,6 +127,7 @@ Module                 | Original theme                               | Replacem
 -----------------------|----------------------------------------------|-----------------------------
 Date                   | date_combo                                   | fel_date_combo
 Field collection table | field_collection_table_multiple_value_fields | fel_fields_collection_table
+Field Group            | multipage_pane                               | fel_fields_multipage_pane
 Matrix                 | matrix_table                                 | fel_fields_matrix_table
 
 
