@@ -326,3 +326,22 @@ function fel_fields_field_collection_table_after_build($element) {
   $element['#theme'] = 'fel_fields_collection_table';
   return $element;
 }
+
+/**
+ * Implements hook_field_group_pre_render_alter().
+ */
+function fel_fields_field_group_pre_render_alter(&$element, $group, &$form) {
+  $supported_groups = array('div', 'tab', 'fieldset', 'htab', 'accordion-item');
+  if (!in_array($group->format_type, $supported_groups) or empty($group->description)) {
+    return;
+  }
+  $element['#description_classes'][] = 'fel-field-group-description';
+  if ($group->format_type == 'div' or $group->format_type == 'accordion-item') {
+    $element['#description'] = $group->description;
+    // Hack alert. Regexp away the <div class="description">...</description> from
+    // '#prefix' and replace it with a themed description that honors
+    // '#description_classes'.
+    $element['#prefix'] = preg_replace('%<div class="description">.*</div>%', '', $element['#prefix']);
+    $element['#prefix'] .= theme('fel_form_element_description', array('element' => $element));
+  }
+}
