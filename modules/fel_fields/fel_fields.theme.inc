@@ -48,12 +48,11 @@ function theme_fel_date_combo($variables) {
  */
 function theme_fel_fields_collection_table($variables) {
   $element = $variables['element'];
-  $output = '';
 
   if (isset($element['#cardinality']) && ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED)) {
     $table_id = drupal_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
-    $required = !empty($element['#required']) ? '<span class="form-required" title="' . t('This field is required.') . '">*</span>' : '';
+    $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
 
     $rows = array();
 
@@ -72,18 +71,12 @@ function theme_fel_fields_collection_table($variables) {
     }
     usort($items, '_field_sort_items_value_helper');
 
-    $label_classes = !empty($element['#title_classes']) ? (' class="' . implode(' ', $element['#title_classes']) . '"') : '';
-    $header = array(
-      array(
-        'data' => '<label' . $label_classes . '>' . t('!title: !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
-        'class' => array('field-label'),
-      ),
-    );
-
+    // Add empty first header column used for table drag in tbody.
+    $header = array(array('data' => '', 'class' => ''));
     // Add the items as table rows.
     foreach ($items as $key => $item) {
       uasort($item, 'element_sort');
-      $item['_weight']['#attributes']['class'] = array($order_class);
+      $item['_weight']['#attributes']['class'][] = $order_class;
       $cells = array(
         array('data' => '', 'class' => array('field-multiple-drag')),
       );
@@ -103,39 +96,23 @@ function theme_fel_fields_collection_table($variables) {
       );
     }
 
-    $output = array(
-      '#prefix' => '<div class="form-item">',
-      '#suffix' => '</div>',
-    );
-    if (!empty($element['#description']) and !empty($element['#description_display']) and $element['#description_display'] == 'before') {
-      $output[] = array(
-        '#markup' => theme('fel_form_element_description', $variables),
-      );
-    }
-    $output['field_collection_table'] = array(
-      '#theme' => 'table',
-      '#header' => $header,
-      '#rows' => $rows,
-      '#attributes' => array(
-        'id' => $table_id,
-        'class' => array(
-          'field-multiple-table',
-        ),
-      ),
-    );
-    if (!empty($element['#description']) and (empty($element['#description_display']) or $element['#description_display'] == 'after')) {
-      $output[] = array(
-        '#markup' => theme('fel_form_element_description', $variables),
-      );
-    }
-    if (isset($add_more_button)) {
-      $output[] = $add_more_button + array(
-        '#prefix' => '<div class="clearfix">',
-        '#suffix' => '</div>',
-      );
-    }
+    $element['#title_classes'][] = 'field-label';
+    $items['title'] = '<label class="' . implode(' ', $element['#title_classes']) . '">';
+    $items['title'] .= t('!title !required', array('!title' => $element['#title'], '!required' => $required));
+    $items['title'] .= '</label>';
 
-    $output = drupal_render($output);
+    if (!empty($element['#description'])) {
+      $items['description'] = theme('fel_form_element_description', $variables);
+    }
+    $items['children'] = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+
+    $output = '<div class="form-item">';
+    $output .= fel_order_output($element, $items);
+    $output .= '</div>';
+
+    if (isset($add_more_button)) {
+      $output .= drupal_render($add_more_button) . '<div class="clearfix"></div>';
+    }
 
     drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
   }

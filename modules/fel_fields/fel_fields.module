@@ -244,16 +244,26 @@ function theme_fel_fields_multiple_form($variables) {
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
     $label_classes = !empty($element['#title_classes']) ? (' class="' . implode(' ', $element['#title_classes']) . '"') : '';
-    $header = array(
-      array(
-        'data' => '<label' . $label_classes . '>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
-        'colspan' => 2,
-        'class' => array('field-label'),
-      ),
-      t('Order'),
-    );
+    $description_before =  (isset($element['#description_display']) and $element['#description_display'] == 'before');
+    $label = '<label' . $label_classes . '>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . '</label>';
+    $fel_items = array();
+    if (!$description_before) {
+      $header = array(
+        array(
+          'data' => $label,
+          'colspan' => 2,
+          'class' => array('field-label'),
+        ),
+        t('Order'),
+      );
+    }
+    else {
+      $fel_items['title'] = $label;
+    }
+    if (!empty($element['#description'])) {
+      $fel_items['description'] = theme('fel_form_element_description', $variables);
+    }
     $rows = array();
-
     // Sort items according to '_weight' (needed when the form comes back after
     // preview or failed validation).
     $items = array();
@@ -282,19 +292,18 @@ function theme_fel_fields_multiple_form($variables) {
       );
     }
     $table_args = array(
-      'header' => $header,
       'rows' => $rows,
       'attributes' => array(
         'id' => $table_id,
         'class' => array('field-multiple-table'),
       ),
     );
-    $parts['children'] = theme('table', $table_args);
-    if ($element['#description']) {
-      $parts['description'] = theme('fel_form_element_description', $variables);
+    if (!$description_before) {
+      $table_args['header'] = $header;
     }
+    $fel_items['children'] = theme('table', $table_args);
     $output = '<div class="form-item">';
-    $output .= fel_order_output($element, $parts);
+    $output .= fel_order_output($element, $fel_items);
     $output .= '<div class="clearfix">' . drupal_render($add_more_button) . '</div>';
     $output .= '</div>';
 
