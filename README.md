@@ -62,20 +62,19 @@ All element and field types core provide is supported by *Form element layout
 fields* (`fel_fields.module`). In addition some popular contrib field modules
 are supported:
 
-* [Address Field][]
-* [Date][]
-* [Email field][]
-* [Entity reference][]
-* [Field Collection Table][]
-* [Field Group][]
-* [Geofield][]
-* [Link][]
-* [Matrix][]
-* [Media][]
-* [Meta tags quick][]
-* [Multiupload filefield widget][]
-* [Multiupload imagefield widget][]
-* [Taxonomy Term Reference Tree Widget][]
+* [Address Field                ](https://www.drupal.org/project/addressfield)
+* [Date                         ](https://www.drupal.org/project/date)
+* [Email field                  ](https://www.drupal.org/project/email)
+* [Entity reference             ](https://www.drupal.org/project/entityreference)
+* [Field Collection Table       ](https://www.drupal.org/project/field_collection_table)
+* [Field Group                  ](https://www.drupal.org/project/field_group)
+* [Geofield                     ](https://www.drupal.org/project/geofield)
+* [Link                         ](https://www.drupal.org/project/link)
+* [Matrix                       ](https://www.drupal.org/project/matrix)
+* [Media                        ](https://www.drupal.org/project/media)
+* [Meta tags quick              ](https://www.drupal.org/project/metatags_quick)
+* [Multiupload filefield widget ](https://www.drupal.org/project/multiupload_filefield_widget)
+* [Multiupload imagefield widget](https://www.drupal.org/project/multiupload_imagefield_widget)
 
 Otherwise it has a fall-back mechanism that recursively will attach the
 appropriate Form API attributes for elements likely to be rendered. If it
@@ -152,22 +151,8 @@ Matrix                 | matrix_table                                 | fel_fiel
   layout. The concept is the same, but was not suitable for D7 port and had some
   real context leakage. FEL was therefore rewritten from scratch.
 
-[address field]:                      https://www.drupal.org/project/addressfield
-[better field description]:           https://www.drupal.org/project/better_field_descriptions
-[date]:                               https://www.drupal.org/project/date
-[element shuffle]:                    https://www.drupal.org/sandbox/kaare/1132056
-[email field]:                        https://www.drupal.org/project/email
-[entity reference]:                   https://www.drupal.org/project/entityreference
-[extra field description]:            https://www.drupal.org/project/extra_field_description
-[field collection table]:             https://www.drupal.org/project/field_collection_table
-[field group]:                        https://www.drupal.org/project/field_group
-[geofield]:                           https://www.drupal.org/project/geofield
-[label help]:                         https://www.drupal.org/project/label_help
-[link]:                               https://www.drupal.org/project/link
-[matrix]:                             https://www.drupal.org/project/matrix
-[media]:                              https://www.drupal.org/project/media
-[meta tags quick]:                    https://www.drupal.org/project/metatags_quick
-[multiupload filefield widget]:       https://www.drupal.org/project/multiupload_filefield_widget
-[multiupload imagefield widget]:      https://www.drupal.org/project/multiupload_imagefield_widget
-[taxonomy term reference tree widget]:https://www.drupal.org/project/term_reference_tree
-[top description]:                    https://www.drupal.org/sandbox/jrb/top_description
+[top description]:          https://www.drupal.org/sandbox/jrb/top_description
+[label help]:               https://www.drupal.org/project/label_help
+[extra field description]:  https://www.drupal.org/project/extra_field_description
+[better field description]: https://www.drupal.org/project/better_field_descriptions
+[element shuffle]:          https://www.drupal.org/sandbox/kaare/1132056
