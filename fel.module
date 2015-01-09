@@ -69,8 +69,8 @@ function fel_element_info_alter(&$elements) {
     }
   }
   // 'radios' and 'checkboxes' are special.
-  $elements['checkboxes']['#pre_render'][] = 'fel_options_pre_render';
-  $elements['radios']['#pre_render'][] = 'fel_options_pre_render';
+  $elements['checkboxes']['#pre_render'][] = 'fel_element_pre_render';
+  $elements['radios']['#pre_render'][] = 'fel_element_pre_render';
 
   // Fieldsets.
   fel_wrapper_replace('fieldset', 'fel_fieldset', $elements['fieldset']);
@@ -81,12 +81,17 @@ function fel_element_info_alter(&$elements) {
     fel_wrapper_replace('text_format_wrapper', 'fel_text_format_wrapper', $elements['text_format']);
     $elements['text_format']['#process'][] = 'fel_filter_process_format';
   }
+
+  // Contrib: Taxonomy Term Reference Tree Widget.
+  if (!empty($elements['checkbox_tree'])) {
+    $elements['checkbox_tree']['#pre_render'][] = 'fel_element_pre_render';
+  }
 }
 
 /**
  * Replace #theme_wrapper => 'form_element' with our own.
  */
-function fel_options_pre_render($element) {
+function fel_element_pre_render($element) {
   fel_wrapper_replace('form_element', 'fel_form_element', $element);
   return $element;
 }
