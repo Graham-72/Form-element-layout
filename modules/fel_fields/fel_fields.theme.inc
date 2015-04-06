@@ -53,7 +53,7 @@ function theme_fel_fields_collection_table($variables) {
     $table_id = drupal_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
-
+    $draggable = empty($element['#custom_settings']['nodragging']);
     $rows = array();
 
     // Sort items according to '_weight' (needed when the form comes back after
@@ -71,33 +71,36 @@ function theme_fel_fields_collection_table($variables) {
     }
     usort($items, '_field_sort_items_value_helper');
 
-    // Add empty first header column used for table drag in tbody.
-    $header = array(array('data' => '', 'class' => ''));
+    $header = $draggable ? array(array('data' => '', 'class' => '')) : array();
     // Add the items as table rows.
     foreach ($items as $key => $item) {
       uasort($item, 'element_sort');
       $item['_weight']['#attributes']['class'][] = $order_class;
-      $cells = array(
-        array('data' => '', 'class' => array('field-multiple-drag')),
-      );
-      foreach (element_children($item) as $field_name) {
-        // Only add the header once.
-        if ($key == 0) {
-          $header[] = array(
-            'data' => '<label>' . t('!title', array('!title' => _field_collection_table_get_title($item[$field_name]))) . '</label>',
-            'class' => array('field-label'),
-          );
-        }
-        $cells[] = array('data' => $item[$field_name]);
+      $cells = array();
+      if ($draggable) {
+        $cells[] = array('data' => '', 'class' => array('field-multiple-drag'));
       }
-      $rows[] = array(
-        'data' => $cells,
-        'class' => array('draggable'),
-      );
+      foreach (element_children($item) as $field_name) {
+        if ($draggable || $field_name != '_weight') {
+          // Only add the header once.
+          if ($key == 0) {
+            $header[] = array(
+              'data' => '<label>' . t('!title', array('!title' => _field_collection_table_get_title($item[$field_name]))) . '</label>',
+              'class' => array('field-label'),
+            );
+          }
+          $cells[] = array('data' => $item[$field_name]);
+        }
+      }
+      $row = array('data' => $cells);
+      if ($draggable) {
+        $row['class'] = array('draggable');
+      }
+      $rows[] = $row;
     }
 
     $element['#title_classes'][] = 'field-label';
-    $items['title'] = '<label class="' . implode(' ', $element['#title_classes']) . '">';
+    $items['title'] = '<label for="' . $table_id . '" class="' . implode(' ', $element['#title_classes']) . '">';
     $items['title'] .= t('!title !required', array('!title' => $element['#title'], '!required' => $required));
     $items['title'] .= '</label>';
 
@@ -114,7 +117,9 @@ function theme_fel_fields_collection_table($variables) {
       $output .= drupal_render($add_more_button) . '<div class="clearfix"></div>';
     }
 
-    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+    if ($draggable) {
+      drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+    }
   }
   else {
     foreach (element_children($element) as $key) {
