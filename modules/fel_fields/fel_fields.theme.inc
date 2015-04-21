@@ -82,14 +82,15 @@ function theme_fel_fields_collection_table($variables) {
       }
       foreach (element_children($item) as $field_name) {
         if ($draggable || $field_name != '_weight') {
+          $col_class = 'col-' . strtr($field_name, '_', '-');
           // Only add the header once.
           if ($key == 0) {
             $header[] = array(
               'data' => '<label>' . t('!title', array('!title' => _field_collection_table_get_title($item[$field_name]))) . '</label>',
-              'class' => array('field-label'),
+              'class' => array('field-label', $col_class),
             );
           }
-          $cells[] = array('data' => $item[$field_name]);
+          $cells[] = array('data' => $item[$field_name], array('class' => $col_class));
         }
       }
       $row = array('data' => $cells);
