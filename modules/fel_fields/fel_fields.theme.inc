@@ -90,7 +90,7 @@ function theme_fel_fields_collection_table($variables) {
               'class' => array('field-label', $col_class),
             );
           }
-          $cells[] = array('data' => $item[$field_name], array('class' => $col_class));
+          $cells[] = array('data' => $item[$field_name], 'class' => $col_class);
         }
       }
       $row = array('data' => $cells);
