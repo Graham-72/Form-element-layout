@@ -64,10 +64,13 @@ function _fel_webform_components_defaults() {
     'date' => 'after',
     'email' => 'after',
     'fieldset' => 'before',
+    'file' => 'after',
+    'grid' => 'after',
     'number' => 'after',
     'select' => 'after',
     'textfield' => 'after',
-    'file' => 'after',
+    'textarea' => 'after',
+    'time' => 'after',
   );
   return $ret;
 }
