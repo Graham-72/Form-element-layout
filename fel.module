@@ -294,7 +294,7 @@ function theme_fel_fieldset($variables) {
  *   The element to search in.
  */
 function fel_wrapper_replace($search, $replace, array &$element) {
-  if (is_array($element['#theme_wrappers'])) {
+  if (!empty($element['#theme_wrappers'])) {
     $key = array_search($search, $element['#theme_wrappers']);
     if ($key !== FALSE) {
       unset($element['#theme_wrappers'][$key]);
@@ -321,11 +321,16 @@ function fel_get_order(array $element) {
     return $element['#element_order'];
   }
 
-  $title_before = (empty($element['#title_display']) or $element['#title_display'] == 'before' or $element['#title_display'] == 'invisible');
+  $title_before = (empty($element['#title_display']) or in_array($element['#title_display'], array('before', 'invisible', 'inline')));
   $description_before = (empty($element['#description_display']) ? FALSE : ($element['#description_display'] == 'before'));
 
   if ($title_before) {
-    $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
+    if (!empty($element['#title_display']) && $element['#title_display'] == 'inline') {
+      $order = $description_before ? array('description', 'title', 'children') : array('title', 'children', 'description');
+    }
+    else {
+      $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
+    }
   }
   else {
     $order = $description_before ? array('description', 'children', 'title') : array('children', 'title', 'description');
