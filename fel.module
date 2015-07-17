@@ -325,11 +325,11 @@ function fel_get_order(array $element) {
   $description_before = (empty($element['#description_display']) ? FALSE : ($element['#description_display'] == 'before'));
 
   if ($title_before) {
-    if (!empty($element['#title_display']) && $element['#title_display'] == 'inline') {
-      $order = $description_before ? array('description', 'title', 'children') : array('title', 'children', 'description');
+    if ($description_before) {
+      $order = !empty($element['#title_display']) && $element['#title_display'] == 'inline' ? array('description', 'title', 'children') : array('title', 'description', 'children');
     }
     else {
-      $order = $description_before ? array('title', 'description', 'children') : array('title', 'children', 'description');
+      $order = array('title', 'children', 'description');
     }
   }
   else {
