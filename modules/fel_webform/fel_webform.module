@@ -82,10 +82,10 @@ function _fel_webform_components_defaults() {
  * Replace the #theme_wrapper 'webform_element' with our customized edition.
  */
 function fel_webform_webform_component_render_alter(&$element, &$component) {
-  $defaults = _fel_webform_components_defaults();
-  if (!empty($defaults[$component['type']])) {
+  $fel_defaults = _fel_webform_components_defaults();
+  if (!empty($fel_defaults[$component['type']])) {
     fel_wrapper_replace('webform_element', 'fel_webform_element', $element);
-    $element['#description_display'] = empty($component['extra']['description_display']) ? $defaults[$component['type']] : $component['extra']['description_display'];
+    $element['#description_display'] = empty($component['extra']['description_display']) ? $fel_defaults[$component['type']] : $component['extra']['description_display'];
   }
 }
 
@@ -95,9 +95,9 @@ function fel_webform_webform_component_render_alter(&$element, &$component) {
  * Add an additional webform component feature 'description_display'.
  */
 function fel_webform_component_info_alter(&$components) {
-  $defaults = _fel_webform_components_defaults();
+  $fel_defaults = _fel_webform_components_defaults();
   foreach ($components as $type => $component) {
-    $components[$type]['features']['description_display'] = !empty($defaults[$type]);
+    $components[$type]['features']['description_display'] = !empty($fel_defaults[$type]);
   }
 }
 
@@ -105,9 +105,9 @@ function fel_webform_component_info_alter(&$components) {
  * Implements hook_webform_component_defaults_alter().
  */
 function fel_webform_webform_component_defaults_alter(&$defaults, $type) {
-  $defaults = _fel_webform_components_defaults();
+  $fel_defaults = _fel_webform_components_defaults();
   if (!empty($defaults[$type])) {
-    $defaults['extra']['description_display'] = $defaults[$type];
+    $defaults['extra']['description_display'] = $fel_defaults[$type];
   }
 }
 
