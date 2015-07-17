@@ -20,6 +20,7 @@ function fel_webform_theme($existing, $type, $theme, $path) {
  * Implements template_preprocess_THEME_HOOK().
  */
 function template_preprocess_fel_webform_element(&$variables) {
+  // We're not doing anything. Call replaced preprocess hook.
   template_preprocess_webform_element($variables);
 }
 
@@ -57,7 +58,7 @@ function theme_fel_webform_element($variables) {
 }
 
 /**
- * Return list of supported webform components and their value.
+ * Webform components that Form element layout supports and their default value.
  */
 function _fel_webform_components_defaults() {
   static $ret = array(
@@ -77,6 +78,8 @@ function _fel_webform_components_defaults() {
 
 /**
  * Implements hook_webform_component_render_alter().
+ *
+ * Replace the #theme_wrapper 'webform_element' with our customized edition.
  */
 function fel_webform_webform_component_render_alter(&$element, &$component) {
   $defaults = _fel_webform_components_defaults();
@@ -88,11 +91,13 @@ function fel_webform_webform_component_render_alter(&$element, &$component) {
 
 /**
  * Implements hook_webform_component_info_alter().
+ *
+ * Add an additional webform component feature 'description_display'.
  */
 function fel_webform_component_info_alter(&$components) {
-  $supported = _fel_webform_components_defaults();
+  $defaults = _fel_webform_components_defaults();
   foreach ($components as $type => $component) {
-    $components[$type]['features']['description_display'] = !empty($supported[$type]);
+    $components[$type]['features']['description_display'] = !empty($defaults[$type]);
   }
 }
 
@@ -100,14 +105,17 @@ function fel_webform_component_info_alter(&$components) {
  * Implements hook_webform_component_defaults_alter().
  */
 function fel_webform_webform_component_defaults_alter(&$defaults, $type) {
-  $supported = _fel_webform_components_defaults();
-  if (!empty($supported[$type])) {
-    $defaults['extra']['description_display'] = $supported[$type];
+  $defaults = _fel_webform_components_defaults();
+  if (!empty($defaults[$type])) {
+    $defaults['extra']['description_display'] = $defaults[$type];
   }
 }
 
 /**
  * Implements hook_form_FORM_ID_alter() for workflow_component_edit().
+ *
+ * Add the actual UI for tweaking FAPI #description_display for workflow
+ * components.
  */
 function fel_webform_form_webform_component_edit_form_alter(&$form, &$form_state, $form_id) {
   $component = $form_state['build_info']['args'][1];

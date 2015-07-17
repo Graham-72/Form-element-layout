@@ -90,7 +90,11 @@ Support for the Field Group module is only partial in the sense that you cannot
 configure or code the position of the group's descriptions, but the description
 provided by the user will have its own classes
 
-[advanced help]: https://www.drupal.org/project/advanced_help
+## Additional support ##
+
+The popuplar [Workflow][] module is also supported so you can change the
+description position in webform components. This is extremely useful for e.g.
+the `grid` component which quickly takes up lots of vertical screen estate.
 
 ## How it works: theme replacements ##
 
@@ -130,6 +134,7 @@ Date                   | date_combo                                   | fel_date
 Field collection table | field_collection_table_multiple_value_fields | fel_fields_collection_table
 Field Group            | multipage_pane                               | fel_fields_multipage_pane
 Matrix                 | matrix_table                                 | fel_fields_matrix_table
+Webform                | webform_element                              | fel_webform_element
 
 
 ## Related projects and issues ##
@@ -153,6 +158,7 @@ Matrix                 | matrix_table                                 | fel_fiel
   real context leakage. FEL was therefore rewritten from scratch.
 
 [address field]:                      https://www.drupal.org/project/addressfield
+[advanced help]:                      https://www.drupal.org/project/advanced_help
 [better field description]:           https://www.drupal.org/project/better_field_descriptions
 [date]:                               https://www.drupal.org/project/date
 [element shuffle]:                    https://www.drupal.org/sandbox/kaare/1132056
@@ -171,3 +177,4 @@ Matrix                 | matrix_table                                 | fel_fiel
 [multiupload imagefield widget]:      https://www.drupal.org/project/multiupload_imagefield_widget
 [taxonomy term reference tree widget]:https://www.drupal.org/project/term_reference_tree
 [top description]:                    https://www.drupal.org/sandbox/jrb/top_description
+[webform]:                            https://www.drupal.org/project/webform

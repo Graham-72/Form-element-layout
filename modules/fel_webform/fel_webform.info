@@ -4,7 +4,3 @@ core = 7.x
 package = Form
 dependencies[] = fel
 dependencies[] = webform
-; stylesheets[all][] = css/fel_webform.base.css
-; scripts[] = scripts/fel_webform.js
-; files[] = fel_webform.test
-; configure = admin/config/something/fel_webform
