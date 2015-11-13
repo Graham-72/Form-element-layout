@@ -50,11 +50,15 @@ function theme_fel_fields_collection_table($variables) {
   $element = $variables['element'];
 
   if (isset($element['#cardinality']) && ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED)) {
+    $settings = (isset($element['#instance']['display']['default']['settings']) ?
+                $element['#instance']['display']['default']['settings'] :
+                array('csscolrow' => FALSE, 'cssfield' => FALSE));
     $table_id = drupal_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
     $draggable = empty($element['#custom_settings']['nodragging']);
     $rows = array();
+    $rown = 0;
 
     // Sort items according to '_weight' (needed when the form comes back after
     // preview or failed validation).
@@ -70,27 +74,60 @@ function theme_fel_fields_collection_table($variables) {
       }
     }
     usort($items, '_field_sort_items_value_helper');
-
     $header = $draggable ? array(array('data' => '', 'class' => '')) : array();
+
     // Add the items as table rows.
     foreach ($items as $key => $item) {
       uasort($item, 'element_sort');
-      $item['_weight']['#attributes']['class'][] = $order_class;
+      $item['_weight']['#attributes']['class'] = array($order_class);
+
+      $rown++;
+      $coln = 0;
       $cells = array();
+
       if ($draggable) {
-        $cells[] = array('data' => '', 'class' => array('field-multiple-drag'));
+        $classes = array('field-multiple-drag', 'field_body');
+        if (isset($settings['cssrowcol']) && $settings['cssrowcol']) {
+          $classes = array_merge($classes, array('r' . $rown, 'c1', 'r' . $rown . '-c1'));
+        }
+        if (isset($settings['cssfield']) && $settings['cssfield']) {
+          $classes = array_merge($classes, array('drag_r' . $rown . '_' . $element['#field_name'], 'td_drag', 'drag_' . $element['#field_name']));
+        }
+
+        $cells[] = array('data' => '', 'class' => $classes);
       }
+
       foreach (element_children($item) as $field_name) {
+        $coln++;
         if ($draggable || $field_name != '_weight') {
-          $col_class = 'col-' . strtr($field_name, '_', '-');
+          $classes = array('col-' . strtr($field_name, '_', '-'));
           // Only add the header once.
           if ($key == 0) {
+            $classes[] = 'field-label';
+            if (isset($settings['cssrowcol']) && $settings['cssrowcol']) {
+              $classes = array_merge($classes, array('h1', 'c' . $coln, 'h1-c' . $coln));
+            }
+            if (isset($settings['cssfield']) && $settings['cssfield']) {
+              $classes = array_merge($classes, array('h1_' . $field_name, 'th_' . $field_name));
+            }
             $header[] = array(
               'data' => '<label>' . t('!title', array('!title' => _field_collection_table_get_title($item[$field_name]))) . '</label>',
-              'class' => array('field-label', $col_class),
+              'class' => $classes,
             );
           }
-          $cells[] = array('data' => $item[$field_name], 'class' => $col_class);
+          else {
+            $classes[] = 'field-body';
+            if (isset($settings['cssrowcol']) && $settings['cssrowcol']) {
+              $classes = array_merge($classes, array('r' . $rown, 'c' . $coln, 'r' . $rown . '-c' . $coln));
+            }
+            if (isset($settings['cssfield']) && $settings['cssfield']) {
+              $classes = array_merge($classes, array('r' . $rown . '_' . $field_name, 'td_' . $field_name));
+            }
+          }
+          $cells[] = array(
+            'data' => $item[$field_name],
+            'class' => $classes,
+          );
         }
       }
       $row = array('data' => $cells);
