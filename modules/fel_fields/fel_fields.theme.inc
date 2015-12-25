@@ -53,7 +53,7 @@ function theme_fel_fields_collection_table($variables) {
     $settings = (isset($element['#instance']['display']['default']['settings']) ?
                 $element['#instance']['display']['default']['settings'] :
                 array('csscolrow' => FALSE, 'cssfield' => FALSE));
-    $table_id = drupal_html_id($element['#field_name'] . '_values');
+    $table_id = backdrop_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
     $draggable = empty($element['#custom_settings']['nodragging']);
@@ -152,16 +152,16 @@ function theme_fel_fields_collection_table($variables) {
     $output .= '</div>';
 
     if (isset($add_more_button)) {
-      $output .= drupal_render($add_more_button) . '<div class="clearfix"></div>';
+      $output .= backdrop_render($add_more_button) . '<div class="clearfix"></div>';
     }
 
     if ($draggable) {
-      drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+      backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
     }
   }
   else {
     foreach (element_children($element) as $key) {
-      $output .= drupal_render($element[$key]);
+      $output .= backdrop_render($element[$key]);
     }
   }
 
@@ -186,7 +186,7 @@ function theme_fel_fields_matrix_table($variables) {
   $table_rows = array();
   for ($row = 1; $row <= $rows_count; $row++) {
     for ($col = 1; $col <= $cols_count; $col++) {
-      $table_rows[$row - 1][$col - 1] = drupal_render($form['grid'][$row . '-' . $col]);
+      $table_rows[$row - 1][$col - 1] = backdrop_render($form['grid'][$row . '-' . $col]);
     }
   }
 
@@ -198,14 +198,14 @@ function theme_fel_fields_matrix_table($variables) {
   }
 
   if ($more_rows) {
-    $table_rows[$rows_count][1] = drupal_render($form['more_rows']);
+    $table_rows[$rows_count][1] = backdrop_render($form['more_rows']);
     for ($col = 2; $col <= $cols_count; $col++) {
       $table_rows[$rows_count][$col] = '&nbsp;';
     }
   }
 
   if ($more_cols) {
-    $column_labels[] = drupal_render($form['more_cols']);
+    $column_labels[] = backdrop_render($form['more_cols']);
     for ($row = 1; $row <= $rows_count; $row++) {
       $table_rows[$row - 1][$cols_count + 1] = '&nbsp;';
     }
@@ -266,7 +266,7 @@ function theme_fel_fields_multipage_pane($variables) {
   element_set_attributes($element, array('id'));
   _form_set_class($element, array('form-wrapper'));
 
-  $output = '<div' . drupal_attributes($element['#attributes']) . '>';
+  $output = '<div' . backdrop_attributes($element['#attributes']) . '>';
   if (!empty($element['#title'])) {
     // Always wrap fieldset legends in a SPAN for CSS positioning.
     $output .= '<h2 class="multipage-pane-title"><span>' . $title . '</span></h2>';

@@ -1,6 +1,6 @@
 name = Form element layout Webform
 description = Webform support for Form element layout
-core = 7.x
+backdrop = 1.x
 package = Form
 dependencies[] = fel
 dependencies[] = webform

@@ -27,7 +27,7 @@ function fel_fields_theme() {
     ),
     'fel_fields_collection_table' => $theme_file + array(
       'render element' => 'element',
-      'includes' => array(drupal_get_path('module', 'field_collection_table') . '/theme/theme.inc'),
+      'includes' => array(backdrop_get_path('module', 'field_collection_table') . '/theme/theme.inc'),
     ),
     'fel_fields_multipage_pane' => $theme_file + array(
       'render element' => 'element',
@@ -71,7 +71,7 @@ function fel_fields_ctools_plugin_directory($owner, $plugin_type) {
  * configured field description resides.
  */
 function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
-  ctools_include('plugins');
+  // ctools_include('plugins');
   list(, , $bundle) = entity_extract_ids($entity_type, $entity);
   $instances = field_info_instances($entity_type, $bundle);
   $field_langcodes = field_language($entity_type, $entity, NULL, $langcode);
@@ -100,19 +100,6 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       _fel_fields_add_attributes($field_form[0], $instance);
     }
 
-    // The plugin system should run independent of whether descriptions exists
-    // or not. Some plugins use this to replace themes down the form tree.
-    $plugin = ctools_get_plugins('fel_fields', 'description_display', $instance['widget']['module']);
-    if ($plugin) {
-      $columns = array();
-      if (!empty($plugin['callback'])) {
-        $ret = $plugin['callback']($field, $instance, $field_form);
-        $columns = is_array($ret) ? $ret : array();
-      }
-      elseif (!empty($plugin['columns'])) {
-        $columns = $plugin['columns'];
-      }
-    }
 
     if ($default_behavior) {
       if ($multiple) {
@@ -175,7 +162,7 @@ function _fel_fields_default_position($field, $instance) {
   }
   // Field types that renders its content in a fieldset and thereby requires a
   // default setting of 'before'
-  $before = drupal_map_assoc(array('addressfield', 'date'));
+  $before = backdrop_map_assoc(array('addressfield', 'date'));
   if (!empty($before[$field['module']])) {
     return 'before';
   }
@@ -240,7 +227,7 @@ function theme_fel_fields_multiple_form($variables) {
   $output = '';
 
   if ($element['#cardinality'] > 1 || $element['#cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-    $table_id = drupal_html_id($element['#field_name'] . '_values');
+    $table_id = backdrop_html_id($element['#field_name'] . '_values');
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
     $label_classes = !empty($element['#title_classes']) ? (' class="' . implode(' ', $element['#title_classes']) . '"') : '';
@@ -280,10 +267,10 @@ function theme_fel_fields_multiple_form($variables) {
     // Add the items as table rows.
     foreach ($items as $key => $item) {
       $item['_weight']['#attributes']['class'] = array($order_class);
-      $delta_element = drupal_render($item['_weight']);
+      $delta_element = backdrop_render($item['_weight']);
       $cells = array(
         array('data' => '', 'class' => array('field-multiple-drag')),
-        drupal_render($item),
+        backdrop_render($item),
         array('data' => $delta_element, 'class' => array('delta-order')),
       );
       $rows[] = array(
@@ -304,14 +291,14 @@ function theme_fel_fields_multiple_form($variables) {
     $fel_items['children'] = theme('table', $table_args);
     $output = '<div class="form-item">';
     $output .= fel_order_output($element, $fel_items);
-    $output .= '<div class="clearfix">' . drupal_render($add_more_button) . '</div>';
+    $output .= '<div class="clearfix">' . backdrop_render($add_more_button) . '</div>';
     $output .= '</div>';
 
-    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
+    backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
   }
   else {
     foreach (element_children($element) as $key) {
-      $output .= drupal_render($element[$key]);
+      $output .= backdrop_render($element[$key]);
     }
   }
 
