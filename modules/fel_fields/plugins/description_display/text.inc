@@ -2,8 +2,12 @@
 
 /**
  * @file
- * Plugin 'description_display' for text.module.
+ * CTools plugin 'description_display' for text.module.
  */
+
+$plugin = array(
+  'callback' => 'fel_field_text_description_display_columns',
+);
 
 /**
  * Plugin callback.

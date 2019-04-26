@@ -365,3 +365,65 @@ function fel_order_output(array $element, array &$parts) {
   $parts = $parts_ordered;
   return $out;
 }
+
+/**
+ *  from ctools
+ * @return array
+ *  An array of plugin types, keyed by the type name.
+ *  See the advanced help topic 'plugins-creating' for details of the array
+ *  properties.
+ */
+function hook_ctools_plugin_type() {
+  $plugins['my_type'] = array(
+    'load themes' => TRUE,
+  );
+
+  return $plugins;
+}
+
+
+/**
+ *  from ctools
+ */
+function hook_ctools_plugin_directory($owner, $plugin_type) {
+  // Form 1 - for a module implementing only the 'content_types' plugin owned
+  // by CTools, this would cause the plugin system to search the
+  // <moduleroot>/plugins/content_types directory for .inc plugin files.
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+	  // Form 2 - if your module implements only Panels plugins, and has 'layouts'
+  // and 'styles' plugins but no 'cache' or 'display_renderers', it is OK to be
+  // lazy and return a directory for a plugin you don't actually implement (so
+  // long as that directory doesn't exist). This lets you avoid ugly in_array()
+  // logic in your conditional, and also makes it easy to add plugins of those
+  // types later without having to change this hook implementation.
+  if ($owner == 'panels') {
+    return "plugins/$plugin_type";
+  }
+
+  // Form 3 - CTools makes no assumptions about where your plugins are located,
+  // so you still have to implement this hook even for plugins created by your
+  // own module.
+  if ($owner == 'mymodule') {
+    // Yes, this is exactly like Form 2 - just a different reasoning for it.
+    return "plugins/$plugin_type";
+  }
+  // Finally, if nothing matches, it's safe to return nothing at all (or NULL).
+}
+
+/**
+ *  from ctools
+ */
+
+function ctools_include($file, $module = 'ctools', $dir = 'includes') {
+  static $used = array();
+
+  $dir = '/' . ($dir ? $dir . '/' : '');
+
+  if (!isset($used[$module][$dir][$file])) {
+    require_once BACKDROP_ROOT . backdrop_get_path('module', $module) . "$dir$file.inc";
+    $used[$module][$dir][$file] = TRUE;
+  }
+}
+

@@ -16,7 +16,7 @@ hard and difficult to maintain.
 </p>
 
 <p>
-fel_fields.module uses Plugin to provide individual field widget support,
+fel_fields.module uses CTools plugin to provide individual field widget support,
 and this is the recommended way for other field widget modules to add support
 for FEL. The plugin is called <strong>description_display</strong> and the its
 purpose is to let fel_fields.module know what columns or rather child elements
@@ -26,7 +26,7 @@ settings.
 </p>
 
 <p>
-In your field widget module, you first have to tell Plugin that you have
+In your field widget module, you first have to tell CTools plugin that you have
 a plugin implementation:
 </p>
 
@@ -42,7 +42,7 @@ function example_ctools_plugin_directory($owner, $plugin_type) {
 </pre>
 
 <p>
-This is the recommended directory structure for Plugin and you will then
+This is the recommended directory structure for CTools plugin and you will then
 have to add your plugin in the 'plugins/description_display' folder. So if your
 field widget module is called 'example.module', your full plugin path within the
 example module folder will be:

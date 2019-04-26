@@ -45,97 +45,22 @@ function fel_fields_element_info_alter(&$type) {
 }
 
 /**
- * Implements hook_fel_fields_description_display().
+ * Implements hook_ctools_plugin_type().
  */
-function fel_fields_fel_fields_description_display() {
-  $plugins = array();
-  // Get from plugins/description_display files.
-  $plugins['addressfield'] = array(
-    // Dummy placeholder for omitting the fallback recursive behavior.
-    'columns' => array(),
-  );
-  $plugins['date'] = array(
-    'callback' => 'fel_fields_date_process_description_display',
-    'file' => array(
-      'module' => 'fel_fields',
-      'path' => 'plugins/description_display/date',
-    ),
-  );
-  $plugins['email'] = array(
-    'columns' => array(
-      'email',
-    ),
-  );
-  $plugins['entityreference'] = array(
-    'columns' => array('target_id'),
-  );
-  $plugins['field_collection_table'] = array(
-    'callback' => 'fel_fields_field_collection_table_process_description_display',
-    'file' => array(
-      'module' => 'fel_fields',
-      'path' => 'plugins/description_display/field_collection_table',
-    ),
-  );
-  $plugins['file'] = array(
-    // Shared callback among all 'file' field types.
-    'callback' => 'fel_fields_file_process_description_display',
-  );
-  $plugins['geofield'] = array(
-    'columns' => array('geom'),
-  );
-  $plugins['image'] = array(
-    // Shared callback among all 'file' field types.
-    'callback' => 'fel_fields_file_process_description_display',
-  );
-  $plugins['link'] = array(
-    // Dummy placeholder for omitting the fallback recursive behavior.
-    'columns' => array(),
-  );
-  $plugins['matrix'] = array(
-    'callback' => 'fel_field_matrix_description_display_process',
-    'file' => array(
-      'module' => 'fel_fields',
-      'path' => 'plugins/description_display/matrix',
-    ),
-  );
-  $plugins['media'] = array(
-    // Shared callback among all 'file' field types.
-    'callback' => 'fel_fields_file_process_description_display',
-  );
-  $plugin['metatags_quick'] = array(
-    'columns' => array(
-      'metatags_quick',
-    ),
-  );
-  $plugins['multiupload_filefield_widget'] = array(
-    // Shared callback among all 'file' field types.
-    'callback' => 'fel_fields_file_process_description_display',
-  );
-  $plugins['multiupload_imagefield_widget'] = array(
-    // Shared callback among all 'file' field types.
-    'callback' => 'fel_fields_file_process_description_display',
-  );
-  $plugins['number'] = array(
-    'columns' => array(
-      'value',
-    ),
-  );
-  $plugins['options'] = array(
-    // Dummy placeholder for omitting the fallback recursive behavior.
-    'columns' => array(),
-  );
-  $plugins['taxonomy'] = array(
-    // Dummy placeholder for omitting the fallback recursive behavior.
-    'columns' => array(),
-  );
-  $plugins['text'] = array(
-    'callback' => 'fel_field_text_description_display_columns',
-    'file' => array(
-      'module' => 'fel_fields',
-      'path' => 'plugins/description_display/text',
-    ),
-  );
+function fel_fields_ctools_plugin_type() {
+  $plugins['description_display'] = array();
   return $plugins;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * AKA our own plugin implementation of 'description_display'.
+ */
+function fel_fields_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'fel_fields') {
+    return 'plugins/' . $plugin_type;
+  }
 }
 
 /**
@@ -146,6 +71,7 @@ function fel_fields_fel_fields_description_display() {
  * configured field description resides.
  */
 function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  // ctools_include('plugins');
   list(, , $bundle) = entity_extract_ids($entity_type, $entity);
   $instances = field_info_instances($entity_type, $bundle);
   $field_langcodes = field_language($entity_type, $entity, NULL, $langcode);
@@ -174,25 +100,6 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       _fel_fields_add_attributes($field_form[0], $instance);
     }
 
-    // The plugin system should run independent of whether descriptions exists
-    // or not. Some plugins use this to replace themes down the form tree.
-    $plugins = module_invoke_all('fel_fields_description_display');
-    $plugin = (!empty($plugins[$instance['widget']['module']])) ? $plugins[$instance['widget']['module']] : NULL;
-    if ($plugin) {
-      $columns = array();
-      if (!empty($plugin['callback'])) {
-        if (!empty($plugin['file'])) {
-          module_load_include('inc', $plugin['file']['module'], $plugin['file']['path']);
-        }
-        if (function_exists($plugin['callback'])) {
-          $ret = $plugin['callback']($field, $instance, $field_form);
-          $columns = is_array($ret) ? $ret : array();
-        }
-      }
-      elseif (!empty($plugin['columns'])) {
-        $columns = $plugin['columns'];
-      }
-    }
 
     if ($default_behavior) {
       if ($multiple) {
@@ -202,7 +109,6 @@ function fel_fields_field_attach_form($entity_type, $entity, &$form, &$form_stat
       // Adapt to field.module's default behavior.
       $field_form = &$field_form[0];
     }
-
     if ($plugin) {
       foreach ($columns as $column) {
         _fel_fields_add_attributes($field_form[$column], $instance);

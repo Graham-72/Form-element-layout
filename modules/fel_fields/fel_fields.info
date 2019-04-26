@@ -1,7 +1,7 @@
 name = Form element layout fields
 description = Configure description position before or after input elements for fields.
 backdrop = 1.x
-type = module
 package = Form
 dependencies[] = fel
 dependencies[] = field
+dependencies[] = ctools
