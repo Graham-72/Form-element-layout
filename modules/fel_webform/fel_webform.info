@@ -1,4 +1,4 @@
-name = Form element layout Webform (fel webform)
+name = Form element layout Webform
 description = Webform support for Form element layout
 backdrop = 1.x
 package = Form

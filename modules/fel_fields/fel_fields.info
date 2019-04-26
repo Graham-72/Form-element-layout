@@ -1,4 +1,4 @@
-name = Form element layout fields (fel fields)
+name = Form element layout fields
 description = Configure description position before or after input elements for fields.
 backdrop = 1.x
 type = module
