@@ -1,4 +1,4 @@
-name = Form element layout
+name = Form element layout (fel)
 description = Form API extension for configuring the layout/order of #title, #description and #children of form items.
 backdrop = 1.x
 package = Form
