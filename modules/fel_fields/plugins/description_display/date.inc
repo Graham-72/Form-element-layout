@@ -2,12 +2,8 @@
 
 /**
  * @file
- * CTools plugin 'description_display' for date.module.
+ * Plugin 'description_display' for date.module.
  */
-
-$plugin = array(
-  'callback' => 'fel_fields_date_process_description_display',
-);
 
 /**
  * Plugin callback.
