@@ -307,7 +307,7 @@ function fel_fields_widget_settings_pre_render($form) {
   $form['element_layout']['description'] = $form['description'];
   $form['element_layout']['description_display'] = $form['instance_description_display'];
   unset($form['label'], $form['description'], $form['instance_description_display']);
-  uasort($form['element_layout'], 'element_sort');
+  backdrop_sort($form['element_layout'], array('#weight'));
   return $form;
 }
 
