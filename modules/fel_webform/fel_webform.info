@@ -1,5 +1,5 @@
 name = Form element layout (fel) Webform
-description = Webform support for Form element layout
+description = Redundant: Webform support for Form element layout. This sub-module is no longer maintained.
 backdrop = 1.x
 package = Form
 dependencies[] = fel
