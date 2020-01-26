@@ -78,7 +78,7 @@ function theme_fel_fields_collection_table($variables) {
 
     // Add the items as table rows.
     foreach ($items as $key => $item) {
-      uasort($item, 'element_sort');
+      backdrop_sort($item, array('#weight'));
       $item['_weight']['#attributes']['class'] = array($order_class);
 
       $rown++;
