@@ -443,7 +443,7 @@ function fel_fields_field_group_pre_render_alter(&$element, $group, &$form) {
     // Hack alert. Regexp away the <div class="description">...</description> from
     // '#prefix' and replace it with a themed description that honors
     // '#description_classes'.
-    $element['#prefix'] = preg_replace('%<div class="description">.*</div>%', '', $element['#prefix']);
+    $element['#prefix'] = preg_replace('%<div class="description">.*</div>%s', '', $element['#prefix']);
     $element['#prefix'] .= theme('fel_form_element_description', array('element' => $element));
   }
 }
